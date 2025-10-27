@@ -1,0 +1,114 @@
+/* Sidebar styles - left navigation */
+:root {
+  --tf-green: #53d113;
+  --muted: #888;
+  --active-blue: #e6f6ff;
+  --active-border: #bfe3ff;
+}
+
+.tf-sidebar {
+  width: 180px;
+  min-width: 160px;
+  height: 100vh;
+  background: #fff;
+  border-right: 1px solid #ececec;
+  padding: 22px 14px;
+  box-sizing: border-box;
+  font-family: 'Nunito', sans-serif;
+}
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 18px;
+  margin-bottom: 6px;
+}
+
+.tf-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.tf-wordmark {
+  color: var(--tf-green);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 10px 8px;
+  border-radius: 10px;
+  transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.nav-icon {
+  font-size: 18px;
+  color: #f8c400; /* yellow-ish like the screenshot icons */
+}
+
+.nav-label {
+  color: inherit;
+}
+
+.nav-item:hover {
+  background: #fbfbfb;
+}
+
+.nav-item.active {
+  background: var(--active-blue);
+  border: 1px solid var(--active-border);
+  color: #0b76c7;
+  box-shadow: 0 0 0 1px rgba(11,118,199,0.06) inset;
+}
+
+.nav-item.active .nav-icon {
+  color: #ffd24a;
+}
+
+@media (max-width: 900px) {
+  .tf-sidebar {
+    width: 72px;
+    padding: 12px 8px;
+  }
+
+  .tf-wordmark,
+  .nav-label {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+  }
+}
+
+/* layout helper used by pages that render the sidebar + content */
+.with-sidebar {
+  display: flex;
+  align-items: flex-start;
+}
+
+.with-sidebar > .home-root,
+.with-sidebar > .patient-root,
+.with-sidebar > .session-root {
+  flex: 1;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 28px 36px; /* give page content breathing room */
+}
