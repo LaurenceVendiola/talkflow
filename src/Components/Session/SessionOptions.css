@@ -65,7 +65,7 @@
   border: 2px solid var(--tf-green);
 }
 .record-icon{font-size:28px}
-.record-title{font-weight:800}
+.record-title{font-weight:800; font-size: 14px;}
 .record-sub{font-size:13px;opacity:0.95}
 
 .start-cta-wrap{margin-top:22px;text-align:center}

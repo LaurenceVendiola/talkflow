@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
 import { LuBookOpenText } from 'react-icons/lu';
 import { FaMicrophone } from 'react-icons/fa';
-import { FiUploadCloud } from 'react-icons/fi';
 import { RiSpeakLine } from 'react-icons/ri';
 import './SessionOptions.css';
+import WavUploader from './WavUploader';
 import Sidebar from '../Sidebar/Sidebar';
 import { getPatients, addSession } from '../../utils/store';
 
@@ -104,16 +104,16 @@ export default function SessionOptionsForm() {
       <section className="so-section start-grid">
         <h3>3. Start Session</h3>
         <div className="start-row">
-          <button
-            type="button"
+          <WavUploader
             className={`upload-card ${startMethod === 'upload' ? 'selected' : ''}`}
-            onClick={() => setStartMethod('upload')}
-            aria-pressed={startMethod === 'upload'}
-          >
-            <div className="upload-icon"><FiUploadCloud /></div>
-            <div className="upload-title">Upload Audio File</div>
-            <div className="upload-sub">Drag & drop or click to browse</div>
-          </button>
+            onActivate={() => setStartMethod('upload')}
+            onFileSelected={(f) => {
+              // mark upload as selected; parent can handle the file as needed
+              setStartMethod('upload');
+              console.log('WavUploader selected file:', f);
+            }}
+            maxSizeBytes={10 * 1024 * 1024}
+          />
 
           <button
             type="button"

@@ -1,0 +1,63 @@
+.wav-uploader {
+  font-family: 'Nunito', sans-serif;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px dashed #ddd;
+  background: #fff;
+  min-width: 220px;
+  cursor: pointer;
+}
+
+.wav-uploader.dragover {
+  border-color: var(--tf-green, #58cc02);
+  background: rgba(88,204,2,0.04);
+}
+
+.wav-uploader .upload-icon {
+  font-size: 22px;
+}
+
+.wav-uploader .upload-title {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.wav-uploader .upload-sub {
+  font-size: 12px;
+  color: #666;
+}
+
+.wav-selected {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.wav-filename {
+  font-size: 13px;
+  color: #333;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wav-clear {
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.wav-error {
+  color: #c0392b;
+  margin-top: 8px;
+  font-size: 13px;
+}
