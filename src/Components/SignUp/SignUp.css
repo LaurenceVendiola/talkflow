@@ -1,10 +1,11 @@
-/* LogIn styles inspired by provided design */
+/* SignUp styles copied from LogIn and reused */
 :root{
-	--tf-green: #58CC02;
+	--tf-green: #53d113;
 	--tf-green-2: #5be81a;
 	--card-bg: #ffffff;
 	--muted: rgba(0,0,0,0.55);
 	--btn-orange: #f69005;
+	/* match login disabled button variables for consistent disabled styling */
 	--btn-disabled: #f0caa3; /* subdued orange for disabled state */
 	--btn-disabled-text: rgba(255,255,255,0.85);
 }
@@ -89,7 +90,7 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    border: 1px solid #ffffff !important; 
+    border: 1px solid #E5E5E5; 
     box-shadow: 0 8px 0 #E5E5E5;
 }
 
@@ -150,6 +151,7 @@
     font-weight: 700;
 }
 
+/* Disabled state for primary button */
 .btn-primary:disabled,
 .btn-primary[disabled] {
 	background: var(--btn-disabled);
@@ -163,6 +165,78 @@
   font-size: 14px;
 }
 
+/* Inline field-level error tooltip */
+.field-error{
+	width: 404px;
+	margin: 6px 0 0 0;
+	box-sizing: border-box;
+	color: #721c24;
+	background: #f8d7da;
+	padding: 8px 10px;
+	border-radius: 6px;
+	border: 1px solid #f5c6cb;
+	text-align: left;
+	font-size: 13px;
+}
+
+/* Tooltip-style field errors */
+.field{
+	position: relative;
+}
+
+.field-tooltip{
+	position: absolute;
+	left: 0;
+	top: calc(100% + 8px);
+	z-index: 20;
+	min-width: 220px;
+	max-width: 404px;
+	box-sizing: border-box;
+	color: #721c24;
+	background: #f8d7da;
+	padding: 8px 10px;
+	border-radius: 6px;
+	border: 1px solid #f5c6cb;
+	text-align: left;
+	font-size: 13px;
+	box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+/* Global tooltip (renders under the form fields) */
+.field-tooltip.global{
+	position: relative;
+	top: 0;
+	left: 0;
+	margin-top: 8px;
+}
+
+/* small arrow pointing to the field */
+.field-tooltip::before{
+	content: "";
+	position: absolute;
+	top: -6px;
+	left: 12px;
+	width: 12px;
+	height: 8px;
+	background: transparent;
+	/* triangle pointing up using clip-path (reliable across browsers) */
+	-webkit-clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+	clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+	background: #f8d7da;
+}
+
+/* Success fill for matched password inputs */
+.input-match{
+  background: rgba(83,209,19,0.10) !important; /* subtle green tint */
+  border-color: var(--tf-green) !important;
+  box-shadow: 0 6px 18px rgba(83,209,19,0.12);
+  transition: background 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.input-match::placeholder{
+  color: rgba(0,0,0,0.6);
+}
+
 .divider {
   display: flex;
   align-items: center;
@@ -172,19 +246,6 @@
   width: 404px;
   gap: 12px;
   margin: 18px 0 12px 0;
-}
-
-/* Error box above form — match input width and center */
-.form-error{
-	width: 404px;
-	margin: 0 auto 12px auto;
-	box-sizing: border-box;
-	color: #721c24;
-	background: #f8d7da;
-	padding: 10px;
-	border-radius: 6px;
-	border: 1px solid #f5c6cb;
-	text-align: left;
 }
 
 .divider::before,
@@ -215,4 +276,3 @@
 	.login-right{padding:24px}
 	.login-card{width:100%;max-width:540px}
 }
-

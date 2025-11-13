@@ -30,17 +30,12 @@
   margin: 6px 0 18px 0;
 }
 
-.session-avatar .avatar-circle {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #f0c;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 700;
-}
+.session-id{color:#777;font-size:13px;margin:0 0 12px 0}
+
+.session-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.session-toolbar .btn-light.delete{color:#b82121;border-color:#f3c6c6}
+
+/* avatar styles removed per request */
 
 .transcript {
   margin-bottom: 26px;
@@ -56,10 +51,12 @@
 }
 
 .transcript-card p {
-  line-height: 1.7;
+  line-height: 1.95; /* increase spacing for readability */
   color: #333;
   margin: 0;
-  font-size: 14px;
+  font-size: 18px; /* transcript text set to 18px */
+  text-align: justify; /* justify the paragraph */
+  letter-spacing: 0.2px;
 }
 
 .results h3 {
@@ -99,6 +96,11 @@
 
   .session-header h1 {
     font-size: 26px;
+  }
+
+  /* scale transcript text down on smaller screens */
+  .transcript-card p {
+    font-size: 16px;
   }
 
   .results-grid {

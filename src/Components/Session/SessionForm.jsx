@@ -1,28 +1,90 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './Session.css';
 import Sidebar from '../Sidebar/Sidebar';
+import { findSessionById, getSessions, findPatientById, deleteSession } from '../../utils/store';
 
 export default function SessionForm() {
-  const text = `When the sunlight strikes raindrops in the air, they act as a prism and form a rainbow. The rainbow is a division of white light into many beautiful colors. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow. Throughout the centuries people have explained the rainbow in various ways. Some have accepted it as a miracle without physical explanation. To the Hebrews it was a token that there would be no more universal floods.`;
+  const text = `When the sunlight strikes raindrops in the air, they act as a prism and form a rainbow. The rainbow is a division of white light into many beautiful colors. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow. Throughout the centuries people have explained the rainbow in various ways. Some have accepted it as a miracle without physical explanation. To the Hebrews it was a token that there would be no more universal floods. The Greeks used to imagine that it was a sign from the gods to foretell war or heavy rain. The Norsemen considered the rainbow as a bridge over which the gods passed from earth to their home in the sky. Others have tried to explain the phenomenon physically. Aristotle thought that the rainbow was caused by reflection of the sun's rays by the rain. Since then physicists have found that it is not reflection, but refraction by the raindrops which causes the rainbows. Many complicated ideas about the rainbow have been formed. The difference in the rainbow depends considerably upon the size of the drops, and the width of the colored band increases as the size of the drops increases. The actual primary rainbow observed is said to be the effect of super imposition of a number of bows. If the red of the second bow falls upon the green of the first, the result is to give a bow with an abnormally wide yellow band, since red and green light when mixed form yellow. This is a very common type of bow, one showing mainly red and yellow, with little or no green or blue.`;
 
-  const results = [
-    { label: 'Sound Repetition', value: 5 },
-    { label: 'Word Repetition', value: 9 },
-    { label: 'Prolongation', value: 9 },
-    { label: 'Blocks', value: 9 }
-  ];
+  const navigate = useNavigate();
+  const location = useLocation();
+  let session = null;
+  if (location && location.state && location.state.sessionId) {
+    session = findSessionById(location.state.sessionId);
+  }
+  // fallback to latest session if no id provided
+  if (!session) {
+    const all = getSessions();
+    if (all.length > 0) session = all[all.length - 1];
+  }
+
+  // try to resolve patient from session
+  const patient = session && session.patientId ? findPatientById(session.patientId) : null;
+  const patientName = patient ? `${patient.firstName} ${patient.lastName}` : null;
+
+  const [showDeleteSessionModal, setShowDeleteSessionModal] = React.useState(false);
+
+  async function handleConfirmDeleteSession() {
+    setShowDeleteSessionModal(false);
+    if (!session || !session.id) return;
+    try {
+      await deleteSession(session.id);
+      // after deleting a session, go to the patient profile so the user sees remaining sessions
+      if (session.patientId) {
+        navigate('/PatientProfile', { state: { patientId: session.patientId } });
+      } else {
+        navigate('/SessionOptions');
+      }
+    } catch (e) {
+      console.error('Failed to delete session', e);
+      alert('Failed to delete session. See console for details.');
+    }
+  }
+
+  const results = session ? [
+    { label: 'Sound Repetitions', value: session.results.disfluencies.soundRepetitions },
+    { label: 'Word Repetitions', value: session.results.disfluencies.wordRepetitions },
+    { label: 'Prolongations', value: session.results.disfluencies.prolongations },
+    { label: 'Interjections', value: session.results.disfluencies.interjections },
+    { label: 'Blocks', value: session.results.disfluencies.blocks }
+  ] : [];
 
   return (
     <div className="with-sidebar">
       <Sidebar />
       <div className="session-root">
       <header className="session-header">
-        <div>
-          <h1>Speech Analysis</h1>
-          <p className="session-sub">Start their journey to confident speech — upload or record a sample.</p>
+        <div style={{width: '100%'}}>
+          <div className="session-toolbar">
+            <button className="btn-light" onClick={() => navigate('/SessionOptions')}>Back to Sessions</button>
+            <div style={{marginLeft: 'auto', display: 'flex', gap: 8}}>
+              <button className="btn-light">Export</button>
+              <button className="btn-light">Share</button>
+              <button className="btn-light delete" onClick={() => setShowDeleteSessionModal(true)}>Delete</button>
+            </div>
+          </div>
+
+          <h1>Speech Analysis Results</h1>
+          <p className="session-sub">{patientName ? `${patientName}'s speech analysis has been completed.` : 'Your speech analysis has been completed.'}</p>
+          {session && session.id && (
+            <p className="session-id">Session ID: {session.id}</p>
+          )}
         </div>
-        <div className="session-avatar"><div className="avatar-circle">M</div></div>
       </header>
+
+      {showDeleteSessionModal && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Confirm delete session">
+          <div className="modal-box">
+            <h2>Delete Speech Analysis?</h2>
+            <p className="muted">This action cannot be undone. This will permanently delete the speech analysis results for <strong>{patientName || 'this patient'}</strong>.</p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12 }}>
+              <button className="btn-light" onClick={() => setShowDeleteSessionModal(false)}>Cancel</button>
+              <button className="btn-green" onClick={handleConfirmDeleteSession}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main>
         <section className="transcript">

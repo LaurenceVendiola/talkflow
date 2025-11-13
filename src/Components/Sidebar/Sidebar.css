@@ -1,40 +1,49 @@
 /* Sidebar styles - left navigation */
 :root {
-  --tf-green: #53d113;
-  --muted: #888;
-  --active-blue: #e6f6ff;
-  --active-border: #bfe3ff;
+  --tf-green: #58CC02;
+  --muted: #868686;
+  --active-blue: #DBEAFF;
+  --active-border: #30B0FF;
+  --sidebar-width: 200px;
+  --sidebar-collapsed-width: 72px;
 }
 
 .tf-sidebar {
-  width: 180px;
+  width: var(--sidebar-width);
   min-width: 160px;
+  position: fixed;
+  top: 0;
+  left: 0;
   height: 100vh;
   background: #fff;
   border-right: 1px solid #ececec;
   padding: 22px 14px;
   box-sizing: border-box;
   font-family: 'Nunito', sans-serif;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
 }
 
 .sidebar-top {
   display: flex;
   align-items: center;
+  justify-content: center; /* center logo + wordmark horizontally */
   gap: 12px;
   padding-bottom: 18px;
   margin-bottom: 6px;
 }
 
 .tf-logo {
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   object-fit: contain;
 }
 
 .tf-wordmark {
   color: var(--tf-green);
-  font-weight: 800;
-  font-size: 18px;
+  font-weight: 700;
+  font-size: 25px;
 }
 
 .sidebar-nav {
@@ -44,27 +53,73 @@
   margin-top: 8px;
 }
 
-.nav-item {
+.sidebar-footer {
+  margin-top: auto;
   display: flex;
   align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+/* Sidebar menu pop */
+.sidebar-menu-pop{position:absolute;left:22px;bottom:72px;background:var(--card-bg);border:1px solid #eee;border-radius:8px;padding:6px;box-shadow:0 8px 20px rgba(0,0,0,0.06);z-index:30;min-width:140px}
+.sidebar-menu-item{display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;cursor:pointer;font-family:inherit}
+.sidebar-menu-item:hover{background:#fafafa}
+
+.sidebar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #0b76c7; /* blue avatar */
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.sidebar-username {
+  color: #333;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center; /* vertical centering */
   gap: 12px;
   color: var(--muted);
   text-decoration: none;
-  padding: 10px 8px;
+  padding: 0 8px; /* remove vertical padding in favor of fixed height */
+  height: 44px; /* consistent item height so icons/labels line up */
   border-radius: 10px;
   transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 900;
   font-size: 13px;
+
+  /* Prevent layout shift when active border appears */
+  box-sizing: border-box;          /* include border in height/width calculations */
+  border: 1px solid transparent;   /* reserve space for active border without shifting */
 }
 
 .nav-icon {
   font-size: 18px;
-  color: #f8c400; /* yellow-ish like the screenshot icons */
+  color: #FFC800; /* yellow-ish like the screenshot icons */
+  /* place icon inside a fixed square so it is always centered */
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
 }
 
 .nav-label {
   color: inherit;
+  line-height: 1; /* ensure label is vertically centered within the item height */
+  display: inline-block;
 }
 
 .nav-item:hover {
@@ -74,17 +129,16 @@
 .nav-item.active {
   background: var(--active-blue);
   border: 1px solid var(--active-border);
-  color: #0b76c7;
-  box-shadow: 0 0 0 1px rgba(11,118,199,0.06) inset;
+  color: #30B0FF;
 }
 
 .nav-item.active .nav-icon {
-  color: #ffd24a;
+  color: #FFC800;
 }
 
 @media (max-width: 900px) {
   .tf-sidebar {
-    width: 72px;
+    width: var(--sidebar-collapsed-width);
     padding: 12px 8px;
   }
 
@@ -98,17 +152,45 @@
   }
 }
 
+@media (min-width: 901px) {
+  /* keep footer visible and aligned on wide screens */
+  .sidebar-footer {
+    padding-bottom: 6px;
+  }
+}
+
+@media (max-width: 900px) {
+  /* hide the username when collapsed */
+  .sidebar-username {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .with-sidebar > .home-root,
+  .with-sidebar > .patient-root,
+  .with-sidebar > .patient-profile-root,
+  .with-sidebar > .session-root,
+  .with-sidebar > .session-options-root {
+    margin-left: var(--sidebar-collapsed-width);
+    padding: 20px;
+  }
+}
+
 /* layout helper used by pages that render the sidebar + content */
 .with-sidebar {
-  display: flex;
-  align-items: flex-start;
+  display: block;
+  align-items: stretch;
 }
 
 .with-sidebar > .home-root,
 .with-sidebar > .patient-root,
-.with-sidebar > .session-root {
+.with-sidebar > .patient-profile-root,
+.with-sidebar > .session-root,
+.with-sidebar > .session-options-root {
   flex: 1;
   min-height: 100vh;
   box-sizing: border-box;
   padding: 28px 36px; /* give page content breathing room */
+  margin-left: var(--sidebar-width);
 }

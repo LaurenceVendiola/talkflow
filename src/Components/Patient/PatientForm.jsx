@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import './Patient.css';
 import Sidebar from '../Sidebar/Sidebar';
+import { savePatient } from '../../utils/store';
+import { useNavigate } from 'react-router-dom';
 
 export default function PatientForm() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
+  const [age, setAge] = useState('');
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
   const [notes, setNotes] = useState('');
+  const navigate = useNavigate();
 
   const handleCancel = () => {
     setFirstName('');
     setLastName('');
-    setEmail('');
+    setAge('');
     setDob('');
     setGender('');
     setNotes('');
@@ -21,9 +24,20 @@ export default function PatientForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: wire up save logic
-    console.log('New patient', { firstName, lastName, email, dob, gender, notes });
-    alert('Patient added (demo)');
+    // create a patient with unique id
+    const patient = {
+      patientId: `p_${Date.now()}`,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      age: age ? Number(age) : null,
+      dob,
+      gender,
+      notes
+    };
+    savePatient(patient);
+    // navigate to profile for the created patient
+    navigate('/PatientProfile', { state: { patientId: patient.patientId } });
+    // reset form
     handleCancel();
   };
 
@@ -48,8 +62,8 @@ export default function PatientForm() {
 
         <div className="row">
           <div className="field full">
-            <label>Email Address</label>
-            <input className="input" placeholder="e.g., john.doe@example.com" value={email} onChange={(e)=>setEmail(e.target.value)} />
+            <label>Age</label>
+            <input className="input" type="number" min="0" placeholder="e.g., 8" value={age} onChange={(e)=>setAge(e.target.value)} />
           </div>
         </div>
 

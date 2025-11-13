@@ -1,16 +1,46 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../../firebaseConfig';
 import './LogIn.css';
 import logo from './talkflow_logo.png';
 
 export default function LogInForm() {
+	const navigate = useNavigate();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
+	const [error, setError] = useState('');
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const handleSubmit = (e) => {
+	// Single non-revealing message for any auth failure
+	const credentialErrorMessage = 'Invalid username or password.';
+
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		// TODO: hook up real auth
-		console.log('Log in with', { email, password });
-		alert('Demo submit — check console');
+		setError('');
+		setIsSubmitting(true);
+		try {
+			// Use the returned user credential when possible to avoid a race
+			// between navigation and the AuthProvider onAuthStateChanged handler.
+			const cred = await auth.signInWithEmailAndPassword(email, password);
+			const signedUser = cred && cred.user ? cred.user : auth.currentUser;
+			if (signedUser) {
+				navigate('/Home');
+				return;
+			}
+
+			// Fallback: wait for the auth state to update once and then navigate.
+			const unsub = auth.onAuthStateChanged((u) => {
+				if (u) {
+					unsub();
+					navigate('/Home');
+				}
+			});
+		} catch (e) {
+			console.error('Login failed', e);
+			setError(credentialErrorMessage);
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	return (
@@ -32,6 +62,11 @@ export default function LogInForm() {
 
 			<div className="login-right">
 				<div className="login-card">
+					{error && (
+						<div className="form-error" role="alert" aria-live="polite">
+							{error}
+						</div>
+					)}
 					<h2 className="card-heading">Log In</h2>
 					<p className="card-sub">Let's keep building confident voices together.</p>
 
@@ -59,14 +94,14 @@ export default function LogInForm() {
 						/>
 
 						<div className="forgot-row">
-							<a className="forgot-link" href="#">Forgot Password?</a>
+							<a className="forgot-link" href="#" onClick={(e) => { e.preventDefault(); navigate('/ForgotPassword'); }}>Forgot Password?</a>
 						</div>
 
-						<button className="btn-primary" type="submit">LOG IN</button>
+						<button className="btn-primary" type="submit" disabled={isSubmitting}>{isSubmitting ? 'LOGGING IN' : 'LOG IN'}</button>
 					</form>
 
 					<div className="divider">OR</div>
-					<p className="signup">Don't have an account? <a href="#">Sign Up</a></p>
+					<p className="signup">Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/SignUp'); }}>Sign Up</a></p>
 				</div>
 			</div>
 		</div>

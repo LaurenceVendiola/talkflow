@@ -1,29 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import useAuth from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import './Home.css';
 import Sidebar from '../Sidebar/Sidebar';
+import { getPatients, getSessions } from '../../utils/store';
 
 export default function HomeForm() {
-  // Static/dummy data to match the provided UI
-  const stats = { patients: 5, sessions: 9 };
-  const patients = [
-    { name: 'Marc Zelo', age: 8, sessions: 1, last: '10/5/2025' },
-    { name: 'Lope Jena', age: 12, sessions: 2, last: '10/3/2025' },
-    { name: 'Andre Bon', age: 11, sessions: 2, last: '10/2/2025' },
-    { name: 'Josefa Riza', age: 9, sessions: 2, last: '10/1/2025' },
-    { name: 'Emi Aldo', age: 7, sessions: 2, last: '9/31/2025' }
-  ];
+ 
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [patients, setPatients] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [patientQuery, setPatientQuery] = useState('');
 
-  const sessions = [
-    { date: 'October 5, 2025', patient: 'Marc Zelo' },
-    { date: 'October 3, 2025', patient: 'Lope Jena' },
-    { date: 'October 2, 2025', patient: 'Andre Bon' },
-    { date: 'October 1, 2025', patient: 'Josefa Riza' },
-    { date: 'September 30, 2025', patient: 'Emi Aldo' },
-    { date: 'September 26, 2025', patient: 'Lope Jena' },
-    { date: 'September 25, 2025', patient: 'Andre Bon' },
-    { date: 'September 24, 2025', patient: 'Josefa Riza' },
-    { date: 'September 23, 2025', patient: 'Emi Aldo' }
-  ];
+  useEffect(() => {
+    function load() {
+      setPatients(getPatients());
+      // sort sessions newest -> oldest by createdAt
+      const sess = getSessions();
+      sess.sort((a,b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+      setSessions(sess);
+    }
+
+    load();
+    window.addEventListener('tf:patients-updated', load);
+    window.addEventListener('tf:sessions-updated', load);
+    return () => {
+      window.removeEventListener('tf:patients-updated', load);
+      window.removeEventListener('tf:sessions-updated', load);
+    };
+  }, []);
+
+  const stats = { patients: patients.length, sessions: sessions.length };
+
+  // flatten sessions for table with patient name lookup (already sorted newest -> oldest)
+  const sessionsForTable = sessions.map(s => {
+    const p = patients.find(x => x.patientId === s.patientId);
+    return { id: s.id, date: s.date || s.createdAt, patient: p ? `${p.firstName} ${p.lastName}` : 'Unknown' };
+  });
 
   return (
     <div className="with-sidebar">
@@ -31,11 +45,8 @@ export default function HomeForm() {
       <div className="home-root">
       <div className="home-header">
         <div>
-          <h1>Welcome back, Maria!</h1>
+          <h1>Welcome back, {user && user.firstName ? user.firstName : ''}!</h1>
           <p className="home-sub">Let's see how your patients are progressing today.</p>
-        </div>
-        <div className="avatar"> 
-          <div className="avatar-circle">M</div>
         </div>
       </div>
 
@@ -56,30 +67,70 @@ export default function HomeForm() {
       <section className="patients">
         <div className="patients-header">
           <h4>Patients</h4>
-          <button className="btn-green">ADD NEW PATIENT</button>
+          <div className="patients-actions">
+            <input
+              className="patient-search"
+              type="search"
+              placeholder="Search Patients"
+              value={patientQuery}
+              onChange={e => setPatientQuery(e.target.value)}
+              aria-label="Search patients by name"
+            />
+            <button className="btn-green" onClick={() => navigate('/Patient')}>ADD NEW PATIENT</button>
+          </div>
         </div>
         <p className="patients-sub">Manage patient profiles, track their progress, and celebrate every step toward confident communication.</p>
 
         <div className="patient-list">
-          {patients.map((p) => (
-            <div className="patient-card" key={p.name}>
-              <div className="patient-name">{p.name}</div>
-              <div className="patient-meta">Age {p.age}</div>
-              <div className="patient-meta">Sessions {p.sessions}</div>
-              <div className="patient-meta small">Last Session {p.last}</div>
-            </div>
-          ))}
+          {(() => {
+            const q = (patientQuery || '').trim().toLowerCase();
+            const filtered = q === '' ? patients : patients.filter(p => (`${p.firstName} ${p.lastName}`).toLowerCase().includes(q));
+            if (patients.length === 0) return <div className="patient-empty">No patients yet</div>;
+            if (filtered.length === 0) return <div className="patient-empty">No matching patients</div>;
+            return filtered.map((p) => {
+             const patientSessions = sessions.filter(s => s.patientId === p.patientId);
+             const sessionCount = patientSessions.length;
+             const latest = sessionCount > 0 ? (patientSessions[0].date || patientSessions[0].createdAt) : '-';
+             return (
+             <button
+               type="button"
+               key={p.patientId}
+               className="patient-card"
+               onClick={() => navigate('/PatientProfile', { state: { patientId: p.patientId } })}
+             >
+               <div className="patient-name">{p.firstName} {p.lastName}</div>
+               <table className="patient-meta-table" aria-hidden="false">
+                 <tbody>
+                   <tr>
+                     <td className="meta-label">Age</td>
+                     <td className="meta-value">{p.age != null ? p.age : '-'}</td>
+                   </tr>
+                   <tr>
+                     <td className="meta-label">Sessions</td>
+                     <td className="meta-value">{sessionCount}</td>
+                   </tr>
+                   <tr>
+                     <td className="meta-label">Last Session</td>
+                     <td className="meta-value">{latest}</td>
+                   </tr>
+                 </tbody>
+               </table>
+             </button>
+            );
+            });
+          })()}
         </div>
       </section>
 
       <section className="sessions">
         <div className="sessions-header">
           <h4>Sessions</h4>
-          <button className="btn-orange">START NEW SESSION</button>
+          <button className="btn-orange" onClick={() => navigate('/SessionOptions')}>START NEW SESSION</button>
         </div>
         <p className="sessions-sub">Review your patient's speech sessions, analyze results, and track every step toward fluent communication.</p>
 
-        <table className="sessions-table">
+  <div className="sessions-table-wrap">
+  <table className="sessions-table">
           <thead>
             <tr>
               <th>Last Session</th>
@@ -88,15 +139,19 @@ export default function HomeForm() {
             </tr>
           </thead>
           <tbody>
-            {sessions.map((s, i) => (
+            {sessionsForTable.length === 0 && (
+              <tr><td colSpan={3}>No sessions yet</td></tr>
+            )}
+            {sessionsForTable.map((s, i) => (
               <tr key={i}>
                 <td>{s.date}</td>
                 <td>{s.patient}</td>
-                <td><a href="#">View</a></td>
+                <td><a href="#" onClick={(e) => { e.preventDefault(); navigate('/Session', { state: { sessionId: s.id } }); }}>View</a></td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
       </section>
       </div>
     </div>
