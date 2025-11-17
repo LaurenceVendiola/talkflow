@@ -16,7 +16,6 @@ from typing import List, Dict, Any
 TARGET_SR = 16000
 CHUNK_SIZE_SEC = 3.0  # Analyze in 3-second chunks
 STEP_SIZE_SEC = 1.0   # With a 1-second step (2-second overlap)
-CONFIDENCE_THRESHOLD = 70.0  # Only report detections with confidence >= 70%
 TASKS = ["block", "wordrep", "soundrep", "prolongation", "interjection"]
 MODEL_DIR = "src/Components/wavlm_models"  # WavLM trained models (from project root)
 
@@ -273,19 +272,14 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
             # Map predictions back to time
             for i, prediction in enumerate(preds):
                 if prediction.item() == 1:  # 1 means DISFLUENT
-                    # Get confidence score (probability of disfluent class)
-                    confidence = probs[i, 1].item()  # Probability of class 1 (disfluent)
-                    confidence_pct = confidence * 100
-                    
-                    # Only include detections that meet the confidence threshold
-                    if confidence_pct < CONFIDENCE_THRESHOLD:
-                        continue
-                    
                     start_time = chunk_start_times[i]
                     end_time = start_time + CHUNK_SIZE_SEC
                     
                     # Extract attention weights for this chunk (convert to list)
                     attn_weights = attention_weights[i].cpu().numpy().tolist()
+                    
+                    # Get confidence score (probability of disfluent class)
+                    confidence = probs[i, 1].item()  # Probability of class 1 (disfluent)
                     
                     # Map task_name to the label and summary key
                     label_map = {
@@ -303,7 +297,7 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
                         "start": round(start_time, 2),
                         "end": round(end_time, 2),
                         "attention": attn_weights,
-                        "confidence": round(confidence_pct, 1)  # Convert to percentage
+                        "confidence": round(confidence * 100, 1)  # Convert to percentage
                     })
                     
                     if summary_key:
@@ -339,6 +333,8 @@ def read_root():
     }
 
 if __name__ == "__main__":
-    # Run the server
-    # Go to http://127.0.0.1:8001/docs to see the automatic API docs
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    import os
+    # Use PORT environment variable from Railway, fallback to 8001 for local
+    port = int(os.environ.get("PORT", 8001))
+    # Railway requires binding to 0.0.0.0
+    uvicorn.run(app, host="0.0.0.0", port=port)

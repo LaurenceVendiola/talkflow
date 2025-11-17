@@ -65,7 +65,7 @@ export default function ForgotPasswordForm() {
           </form>
 
           <div className="divider">OR</div>
-          <p className="signup">Remembered your password? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/LogIn'); }}>Log In</a></p>
+          <p className="signup">Remembered your password? <a href="/" onClick={(e) => { e.preventDefault(); navigate('/LogIn'); }}>Log In</a></p>
         </div>
       </div>
     </div>

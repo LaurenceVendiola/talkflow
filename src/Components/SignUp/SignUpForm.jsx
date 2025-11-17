@@ -193,11 +193,11 @@ export default function SignUpForm() {
 						{generalError && <div className="field-tooltip global" role="alert">{generalError}</div>}
 
 						<button className="btn-primary" type="submit" disabled={isSubmitting}>{isSubmitting ? 'SIGNING UP' : 'SIGN UP'}</button>
-					</form>
+				</form>
 
-					<div className="divider">OR</div>
-					<p className="signup">Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/LogIn'); }}>Log In</a></p>
-				</div>
+				<div className="divider">OR</div>
+				<p className="signup">Already have an account? <a href="/" onClick={(e) => { e.preventDefault(); navigate('/LogIn'); }}>Log In</a></p>
+			</div>
 			</div>
 		</div>
 	);

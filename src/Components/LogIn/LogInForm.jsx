@@ -91,17 +91,17 @@ export default function LogInForm() {
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
 							required
-						/>
+					/>
 
-						<div className="forgot-row">
-							<a className="forgot-link" href="#" onClick={(e) => { e.preventDefault(); navigate('/ForgotPassword'); }}>Forgot Password?</a>
-						</div>
+					<div className="forgot-row">
+						<a className="forgot-link" href="/" onClick={(e) => { e.preventDefault(); navigate('/ForgotPassword'); }}>Forgot Password?</a>
+					</div>
 
-						<button className="btn-primary" type="submit" disabled={isSubmitting}>{isSubmitting ? 'LOGGING IN' : 'LOG IN'}</button>
-					</form>
+					<button className="btn-primary" type="submit" disabled={isSubmitting}>{isSubmitting ? 'LOGGING IN' : 'LOG IN'}</button>
+				</form>
 
-					<div className="divider">OR</div>
-					<p className="signup">Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/SignUp'); }}>Sign Up</a></p>
+				<div className="divider">OR</div>
+				<p className="signup">Don't have an account? <a href="/" onClick={(e) => { e.preventDefault(); navigate('/SignUp'); }}>Sign Up</a></p>
 				</div>
 			</div>
 		</div>

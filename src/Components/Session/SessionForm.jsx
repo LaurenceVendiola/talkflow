@@ -43,27 +43,6 @@ export default function SessionForm() {
     }
   }
 
-  // Calculate average confidence for each disfluency type
-  const calculateConfidence = (typeKey) => {
-    if (!session || !session.detections) return null;
-    
-    const typeMap = {
-      soundRepetitions: 'SND',
-      wordRepetitions: 'WP',
-      prolongations: 'Pro',
-      interjections: 'Intrj',
-      blocks: 'Block'
-    };
-    
-    const detectionType = typeMap[typeKey];
-    const relevantDetections = session.detections.filter(d => d.type === detectionType);
-    
-    if (relevantDetections.length === 0) return null;
-    
-    const avgConfidence = relevantDetections.reduce((sum, d) => sum + (d.confidence || 0), 0) / relevantDetections.length;
-    return avgConfidence.toFixed(1);
-  };
-
   const results = session ? [
     { label: 'Sound Repetitions', value: session.results.disfluencies.soundRepetitions },
     { label: 'Word Repetitions', value: session.results.disfluencies.wordRepetitions },
@@ -96,7 +75,7 @@ export default function SessionForm() {
       console.log('Session detections:', session.detections);
       console.log('Detection logs:', detectionLogs);
     }
-  }, [session]);
+  }, [session, detectionLogs]);
 
   // Map short type names to full labels
   const typeLabels = {

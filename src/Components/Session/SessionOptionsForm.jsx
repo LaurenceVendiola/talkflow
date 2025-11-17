@@ -29,12 +29,11 @@ export default function SessionOptionsForm() {
       const list = getPatients();
       if (list.length > 0 && selectedPatient === null) setSelectedPatient(list[0].patientId);
     }
-    load();
-    window.addEventListener('tf:patients-updated', load);
-    return () => window.removeEventListener('tf:patients-updated', load);
-  }, []);
-
-  return (
+  load();
+  window.addEventListener('tf:patients-updated', load);
+  return () => window.removeEventListener('tf:patients-updated', load);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);  return (
     <div className="with-sidebar">
       <Sidebar />
       <div className="session-options-root">

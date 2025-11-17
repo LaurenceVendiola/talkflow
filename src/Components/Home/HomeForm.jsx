@@ -146,7 +146,7 @@ export default function HomeForm() {
               <tr key={i}>
                 <td>{s.date}</td>
                 <td>{s.patient}</td>
-                <td><a href="#" onClick={(e) => { e.preventDefault(); navigate('/Session', { state: { sessionId: s.id } }); }}>View</a></td>
+                <td><a href="/" onClick={(e) => { e.preventDefault(); navigate('/Session', { state: { sessionId: s.id } }); }}>View</a></td>
               </tr>
             ))}
           </tbody>

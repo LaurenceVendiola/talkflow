@@ -3,7 +3,8 @@
  * Handles communication with the Python FastAPI backend for audio analysis
  */
 
-const API_BASE_URL = 'http://127.0.0.1:8001';
+// Use environment variable for API URL (set in Vercel), fallback to local
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8001';
 
 /**
  * Check if the analysis server is running and models are loaded
