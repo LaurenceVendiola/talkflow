@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './Session.css';
 import Sidebar from '../Sidebar/Sidebar';
+import AttentionHeatmap from './AttentionHeatmap';
 import { findSessionById, getSessions, findPatientById, deleteSession } from '../../utils/store';
 
 export default function SessionForm() {
@@ -69,6 +70,26 @@ export default function SessionForm() {
           <p className="session-sub">{patientName ? `${patientName}'s speech analysis has been completed.` : 'Your speech analysis has been completed.'}</p>
           {session && session.id && (
             <p className="session-id">Session ID: {session.id}</p>
+          )}
+          
+          {/* Audio playback section */}
+          {session && session.audioURL && (
+            <div className="audio-playback-section">
+              <div className="audio-info">
+                <strong>Audio File:</strong> {session.audioFileName || 'Uploaded Audio'}
+              </div>
+              <audio controls className="audio-player" src={session.audioURL}>
+                Your browser does not support the audio element.
+              </audio>
+              
+              {/* Attention Heatmap */}
+              <AttentionHeatmap 
+                detections={session.detections || []}
+                duration={session.audioDuration || 30}
+                width={800}
+                height={200}
+              />
+            </div>
           )}
         </div>
       </header>

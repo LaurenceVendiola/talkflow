@@ -8,6 +8,7 @@ import './SessionOptions.css';
 import WavUploader from './WavUploader';
 import Sidebar from '../Sidebar/Sidebar';
 import { getPatients, addSession } from '../../utils/store';
+import { analyzeAudioFile, formatAnalysisResults, checkServerHealth } from '../../services/disfluencyAnalyzer';
 
 export default function SessionOptionsForm() {
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -15,6 +16,9 @@ export default function SessionOptionsForm() {
   const [startMethod, setStartMethod] = useState('record');
   const [patients, setPatients] = useState([]);
   const [patientQuery, setPatientQuery] = useState('');
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState('');
 
   const navigate = useNavigate();
 
@@ -108,8 +112,9 @@ export default function SessionOptionsForm() {
             className={`upload-card ${startMethod === 'upload' ? 'selected' : ''}`}
             onActivate={() => setStartMethod('upload')}
             onFileSelected={(f) => {
-              // mark upload as selected; parent can handle the file as needed
               setStartMethod('upload');
+              setUploadedFile(f);
+              setAnalysisError('');
               console.log('WavUploader selected file:', f);
             }}
             maxSizeBytes={10 * 1024 * 1024}
@@ -128,35 +133,86 @@ export default function SessionOptionsForm() {
         </div>
 
         <div className="start-cta-wrap">
+          {analysisError && (
+            <div className="analysis-error" role="alert">{analysisError}</div>
+          )}
           <button
             type="button"
             className="start-cta"
-            onClick={() => {
-              if (!selectedPatient) return alert('Please select a patient first');
-              // create random dysfluency results (1-10) for repetitions, prolongations, blocks
-              const soundRepetitions = Math.floor(Math.random() * 10) + 1;
-              const prolongations = Math.floor(Math.random() * 10) + 1;
-              const interjections = Math.floor(Math.random() * 10) + 1;
-              const blocks = Math.floor(Math.random() * 10) + 1;
-              const wordRepetitions = Math.floor(Math.random() * 10) + 1;
-              const total = soundRepetitions + prolongations + interjections + blocks + wordRepetitions;
-              const session = {
-                id: `s_${Date.now()}`,
-                patientId: selectedPatient,
-                date: new Date().toLocaleDateString(),
-                type: sessionType === 'reading' ? 'Reading Passage' : 'Free Speech',
-                method: startMethod === 'record' ? 'Recording' : 'Upload',
-                results: {
-                  disfluencies: { soundRepetitions, prolongations, interjections, blocks, wordRepetitions }
-                },
-                createdAt: new Date().toISOString()
-              };
-              addSession(session);
-              // navigate to Session page and pass session id so results can be shown
-              navigate('/Session', { state: { sessionId: session.id } });
+            disabled={isAnalyzing}
+            onClick={async () => {
+              if (!selectedPatient) {
+                alert('Please select a patient first');
+                return;
+              }
+
+              setAnalysisError('');
+
+              // For upload method, analyze the file with Python API
+              if (startMethod === 'upload' && uploadedFile) {
+                setIsAnalyzing(true);
+                try {
+                  // Check if server is running
+                  await checkServerHealth();
+
+                  // Analyze the audio file
+                  const analysisResult = await analyzeAudioFile(uploadedFile);
+                  const formattedResults = formatAnalysisResults(analysisResult);
+
+                  // Create audio URL for playback in session view
+                  const audioURL = URL.createObjectURL(uploadedFile);
+
+                  // Create session with real analysis results
+                  const session = {
+                    id: `s_${Date.now()}`,
+                    patientId: selectedPatient,
+                    date: new Date().toLocaleDateString(),
+                    type: sessionType === 'reading' ? 'Reading Passage' : 'Free Speech',
+                    method: 'Upload',
+                    audioFileName: uploadedFile.name,
+                    audioURL: audioURL,
+                    detections: formattedResults.detections || [],
+                    audioDuration: analysisResult.duration || 30,
+                    results: {
+                      disfluencies: formattedResults.disfluencies
+                    },
+                    createdAt: new Date().toISOString()
+                  };
+                  addSession(session);
+                  navigate('/Session', { state: { sessionId: session.id } });
+                } catch (error) {
+                  console.error('Analysis error:', error);
+                  setAnalysisError(error.message || 'Analysis failed. Please try again.');
+                } finally {
+                  setIsAnalyzing(false);
+                }
+              } else if (startMethod === 'record') {
+                // For recording method, use mock data for now
+                const soundRepetitions = Math.floor(Math.random() * 10) + 1;
+                const prolongations = Math.floor(Math.random() * 10) + 1;
+                const interjections = Math.floor(Math.random() * 10) + 1;
+                const blocks = Math.floor(Math.random() * 10) + 1;
+                const wordRepetitions = Math.floor(Math.random() * 10) + 1;
+                
+                const session = {
+                  id: `s_${Date.now()}`,
+                  patientId: selectedPatient,
+                  date: new Date().toLocaleDateString(),
+                  type: sessionType === 'reading' ? 'Reading Passage' : 'Free Speech',
+                  method: 'Recording',
+                  results: {
+                    disfluencies: { soundRepetitions, prolongations, interjections, blocks, wordRepetitions }
+                  },
+                  createdAt: new Date().toISOString()
+                };
+                addSession(session);
+                navigate('/Session', { state: { sessionId: session.id } });
+              } else {
+                alert('Please upload an audio file or select recording method');
+              }
             }}
           >
-            ▶ Start Session
+            {isAnalyzing ? '⏳ Analyzing...' : '▶ Start Session'}
           </button>
         </div>
       </section>

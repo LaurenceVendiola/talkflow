@@ -35,11 +35,19 @@ export default function WavUploader({ onFileSelected, maxSizeBytes = 10 * 1024 *
     inputRef.current && inputRef.current.click();
   };
 
-  const isWav = f => {
+  // Accept both WAV and MP3 formats by extension or common MIME types
+  const isAcceptedAudio = f => {
     if (!f) return false;
     const name = (f.name || '').toLowerCase();
     const type = (f.type || '').toLowerCase();
-    return name.endsWith('.wav') || type === 'audio/wav' || type === 'audio/x-wav';
+    return (
+      name.endsWith('.wav') ||
+      name.endsWith('.mp3') ||
+      type === 'audio/wav' ||
+      type === 'audio/x-wav' ||
+      type === 'audio/mpeg' ||
+      type === 'audio/mp3'
+    );
   };
 
   const validateAndEmit = f => {
@@ -48,8 +56,8 @@ export default function WavUploader({ onFileSelected, maxSizeBytes = 10 * 1024 *
       setError('No file selected.');
       return;
     }
-    if (!isWav(f)) {
-      setError('Invalid file type — please select a .wav audio file.');
+    if (!isAcceptedAudio(f)) {
+      setError('Invalid file type — please select a .wav or .mp3 audio file.');
       return;
     }
     if (maxSizeBytes && f.size > maxSizeBytes) {
@@ -107,7 +115,7 @@ export default function WavUploader({ onFileSelected, maxSizeBytes = 10 * 1024 *
       <input
         ref={inputRef}
         type="file"
-        accept=".wav,audio/wav,audio/x-wav"
+        accept="audio/wav,audio/x-wav,audio/mpeg,audio/mp3,audio/*"
         style={{ display: 'none' }}
         onChange={onInputChange}
         aria-hidden="true"
