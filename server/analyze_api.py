@@ -16,6 +16,7 @@ from typing import List, Dict, Any
 TARGET_SR = 16000
 CHUNK_SIZE_SEC = 3.0  # Analyze in 3-second chunks
 STEP_SIZE_SEC = 1.0   # With a 1-second step (2-second overlap)
+CONFIDENCE_THRESHOLD = 70.0  # Only report detections with confidence >= 70%
 TASKS = ["block", "wordrep", "soundrep", "prolongation", "interjection"]
 MODEL_DIR = "src/Components/wavlm_models"  # WavLM trained models (from project root)
 
@@ -136,7 +137,13 @@ model_bank = {}
 # Add CORS middleware to allow React app to call this API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # React dev server
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "https://*.githubpreview.dev",  # Codespaces preview URLs
+        "https://*.app.github.dev"       # Alternative Codespaces URLs
+    ],
+    allow_origin_regex=r"https://.*\.githubpreview\.dev|https://.*\.app\.github\.dev",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -261,10 +268,19 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
         for task_name, model in model_bank.items():
             logits, attention_weights = model(features, mask)
             preds = torch.argmax(logits, dim=1)
+            probs = F.softmax(logits, dim=1)  # Get probabilities for confidence
             
             # Map predictions back to time
             for i, prediction in enumerate(preds):
                 if prediction.item() == 1:  # 1 means DISFLUENT
+                    # Get confidence score (probability of disfluent class)
+                    confidence = probs[i, 1].item()  # Probability of class 1 (disfluent)
+                    confidence_pct = confidence * 100
+                    
+                    # Only include detections that meet the confidence threshold
+                    if confidence_pct < CONFIDENCE_THRESHOLD:
+                        continue
+                    
                     start_time = chunk_start_times[i]
                     end_time = start_time + CHUNK_SIZE_SEC
                     
@@ -286,7 +302,8 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
                         "type": label,
                         "start": round(start_time, 2),
                         "end": round(end_time, 2),
-                        "attention": attn_weights
+                        "attention": attn_weights,
+                        "confidence": round(confidence_pct, 1)  # Convert to percentage
                     })
                     
                     if summary_key:

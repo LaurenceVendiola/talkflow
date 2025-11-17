@@ -43,6 +43,27 @@ export default function SessionForm() {
     }
   }
 
+  // Calculate average confidence for each disfluency type
+  const calculateConfidence = (typeKey) => {
+    if (!session || !session.detections) return null;
+    
+    const typeMap = {
+      soundRepetitions: 'SND',
+      wordRepetitions: 'WP',
+      prolongations: 'Pro',
+      interjections: 'Intrj',
+      blocks: 'Block'
+    };
+    
+    const detectionType = typeMap[typeKey];
+    const relevantDetections = session.detections.filter(d => d.type === detectionType);
+    
+    if (relevantDetections.length === 0) return null;
+    
+    const avgConfidence = relevantDetections.reduce((sum, d) => sum + (d.confidence || 0), 0) / relevantDetections.length;
+    return avgConfidence.toFixed(1);
+  };
+
   const results = session ? [
     { label: 'Sound Repetitions', value: session.results.disfluencies.soundRepetitions },
     { label: 'Word Repetitions', value: session.results.disfluencies.wordRepetitions },
@@ -50,6 +71,41 @@ export default function SessionForm() {
     { label: 'Interjections', value: session.results.disfluencies.interjections },
     { label: 'Blocks', value: session.results.disfluencies.blocks }
   ] : [];
+
+  // Format timestamp as MM:SS.mmm
+  const formatTimestamp = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 1000);
+    return `${minutes}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+  };
+
+  // Format time range
+  const formatTimeRange = (startSeconds, endSeconds) => {
+    return `${formatTimestamp(startSeconds)} - ${formatTimestamp(endSeconds)}`;
+  };
+
+  // Get sorted detections (oldest to newest)
+  const detectionLogs = session && session.detections 
+    ? [...session.detections].sort((a, b) => a.start - b.start)
+    : [];
+
+  // Debug: log detections
+  React.useEffect(() => {
+    if (session) {
+      console.log('Session detections:', session.detections);
+      console.log('Detection logs:', detectionLogs);
+    }
+  }, [session]);
+
+  // Map short type names to full labels
+  const typeLabels = {
+    'Block': 'Block',
+    'WP': 'Word Repetition',
+    'SND': 'Sound Repetition',
+    'Pro': 'Prolongation',
+    'Intrj': 'Interjection'
+  };
 
   return (
     <div className="with-sidebar">
@@ -125,6 +181,21 @@ export default function SessionForm() {
             ))}
           </div>
         </section>
+
+        {detectionLogs.length > 0 && (
+          <section className="detection-logs">
+            <h3>Detection Logs</h3>
+            <div className="logs-container">
+              {detectionLogs.map((detection, index) => (
+                <div className="log-entry" key={index}>
+                  <div className="log-timestamp">{formatTimeRange(detection.start, detection.end)}</div>
+                  <div className="log-type">{typeLabels[detection.type] || detection.type}</div>
+                  <div className="log-confidence">{detection.confidence}% confidence</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       </div>
     </div>

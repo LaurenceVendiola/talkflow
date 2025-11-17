@@ -115,6 +115,82 @@
   margin-top: 8px;
 }
 
+.result-confidence {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 12px;
+  color: #666;
+}
+
+.confidence-label {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.confidence-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--tf-green);
+}
+
+.detection-logs {
+  margin-top: 30px;
+}
+
+.detection-logs h3 {
+  margin: 6px 0 12px 0;
+}
+
+.logs-container {
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  overflow: hidden;
+}
+
+.log-entry {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid #f5f5f5;
+  transition: background 0.2s;
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-entry:hover {
+  background: #fafafa;
+}
+
+.log-timestamp {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  min-width: 200px;
+}
+
+.log-type {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+}
+
+.log-confidence {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tf-green);
+  padding: 4px 12px;
+  background: rgba(83, 209, 19, 0.1);
+  border-radius: 12px;
+}
+
 @media (max-width: 900px) {
   .session-root {
     padding: 20px;
