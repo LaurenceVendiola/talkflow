@@ -65,9 +65,11 @@ export default function SessionForm() {
   };
 
   // Get sorted detections (oldest to newest)
-  const detectionLogs = session && session.detections 
-    ? [...session.detections].sort((a, b) => a.start - b.start)
-    : [];
+  const detectionLogs = React.useMemo(() => {
+    return session && session.detections 
+      ? [...session.detections].sort((a, b) => a.start - b.start)
+      : [];
+  }, [session]);
 
   // Debug: log detections
   React.useEffect(() => {
