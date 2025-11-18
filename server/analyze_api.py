@@ -139,10 +139,12 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000", 
         "http://127.0.0.1:3000",
+        "https://talkflow-thesis.vercel.app",  # Vercel production
+        "https://*.vercel.app",  # Vercel preview deployments
         "https://*.githubpreview.dev",  # Codespaces preview URLs
         "https://*.app.github.dev"       # Alternative Codespaces URLs
     ],
-    allow_origin_regex=r"https://.*\.githubpreview\.dev|https://.*\.app\.github\.dev",
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.githubpreview\.dev|https://.*\.app\.github\.dev",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
