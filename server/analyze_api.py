@@ -11,6 +11,7 @@ import numpy as np
 import io
 from typing import Dict, Any
 from pydub import AudioSegment
+import torch.hub
 
 # --- Configuration ---
 TARGET_SR = 16000
@@ -132,6 +133,7 @@ app = FastAPI(title="Disfluency Analyzer API")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 feature_extractor = None
 model_bank = {}
+vad_model = None
 
 # Add CORS middleware to allow React app to call this API
 app.add_middleware(
@@ -145,7 +147,7 @@ app.add_middleware(
 @app.on_event("startup")
 def load_models():
     """Load all models into memory when the server starts."""
-    global feature_extractor, model_bank, device
+    global feature_extractor, model_bank, device, vad_model
     print(f"Loading models onto device: {device}...")
     print(f"Current working directory: {Path.cwd()}")
     print(f"Looking for models in: {Path(MODEL_DIR).absolute()}")
@@ -158,6 +160,16 @@ def load_models():
         print(f"CRITICAL: Failed to load WavLMLayeredExtractor: {e}")
         print("This is often due to a missing 'transformers' install or network issue.")
         return
+    
+    # Load Silero VAD model for speech region detection
+    try:
+        vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=False)
+        vad_model.to(device)
+        print("Successfully loaded Silero VAD model")
+    except Exception as e:
+        print(f"WARNING: Failed to load Silero VAD: {e}")
+        print("VAD will be disabled, processing entire audio without speech detection.")
+        vad_model = None
 
     for task_name in TASKS:
         model_path = Path(f"{MODEL_DIR}/best_model_{task_name}_wavlm.pth")
@@ -183,6 +195,54 @@ def load_models():
             print(f"ERROR: Failed to load model for task '{task_name}': {e}")
             
     print(f"Model loading complete. Loaded {len(model_bank)} models.")
+
+def detect_speech_regions(waveform: np.ndarray, sr: int = 16000, threshold: float = 0.5):
+    """
+    Detect speech regions in audio using Silero VAD.
+    Returns list of (start_time, end_time) tuples in seconds.
+    """
+    if vad_model is None:
+        # VAD not available, return entire audio as speech
+        return [(0.0, len(waveform) / sr)]
+    
+    try:
+        # Convert to torch tensor
+        audio_tensor = torch.from_numpy(waveform).float().to(device)
+        
+        # Get speech timestamps (Silero VAD returns timestamps in seconds)
+        speech_timestamps = []
+        window_size_samples = 512  # Silero VAD uses 512 sample windows at 16kHz
+        
+        # Process audio in chunks for VAD
+        for i in range(0, len(audio_tensor), window_size_samples):
+            chunk = audio_tensor[i:i + window_size_samples]
+            if len(chunk) < window_size_samples:
+                # Pad last chunk if needed
+                chunk = torch.nn.functional.pad(chunk, (0, window_size_samples - len(chunk)))
+            
+            speech_prob = vad_model(chunk.unsqueeze(0), sr).item()
+            
+            if speech_prob >= threshold:
+                start_time = i / sr
+                end_time = min((i + window_size_samples) / sr, len(waveform) / sr)
+                
+                # Merge consecutive speech regions
+                if speech_timestamps and start_time - speech_timestamps[-1][1] < 0.3:
+                    # Extend previous region
+                    speech_timestamps[-1] = (speech_timestamps[-1][0], end_time)
+                else:
+                    # New speech region
+                    speech_timestamps.append((start_time, end_time))
+        
+        # If no speech detected, return entire audio
+        if not speech_timestamps:
+            return [(0.0, len(waveform) / sr)]
+        
+        return speech_timestamps
+        
+    except Exception as e:
+        print(f"WARNING: VAD failed with error: {e}. Processing entire audio.")
+        return [(0.0, len(waveform) / sr)]
 
 # --- 3. The Analyzer Endpoint ---
 
@@ -224,31 +284,46 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Could not read audio file: {str(e)}")
 
-    # 2. Create sliding window chunks
+    # 2. Detect speech regions using VAD
+    print("Running VAD to detect speech regions...")
+    speech_regions = detect_speech_regions(waveform, TARGET_SR)
+    print(f"Detected {len(speech_regions)} speech regions")
+    
+    # 3. Create sliding window chunks only within speech regions
     chunk_samples = int(CHUNK_SIZE_SEC * TARGET_SR)
     step_samples = int(STEP_SIZE_SEC * TARGET_SR)
     
     all_chunks = []
     chunk_start_times = []
     
-    for start in range(0, len(waveform), step_samples):
-        end = start + chunk_samples
-        chunk = waveform[start:end]
+    for speech_start, speech_end in speech_regions:
+        # Convert speech region times to sample indices
+        start_sample = int(speech_start * TARGET_SR)
+        end_sample = int(speech_end * TARGET_SR)
         
-        # Pad the last chunk if it's too short
-        if len(chunk) < chunk_samples:
-            chunk = np.pad(chunk, (0, chunk_samples - len(chunk)), 'constant')
+        # Create chunks within this speech region
+        for start in range(start_sample, end_sample, step_samples):
+            end = start + chunk_samples
             
-        all_chunks.append(torch.from_numpy(chunk).float())
-        chunk_start_times.append(start / TARGET_SR)
-        
-        if end >= len(waveform):
-            break
+            # Only include chunk if it's mostly within speech region
+            if start >= end_sample:
+                break
+                
+            chunk = waveform[start:min(end, len(waveform))]
+            
+            # Pad the last chunk if it's too short
+            if len(chunk) < chunk_samples:
+                chunk = np.pad(chunk, (0, chunk_samples - len(chunk)), 'constant')
+            
+            all_chunks.append(torch.from_numpy(chunk).float())
+            chunk_start_times.append(start / TARGET_SR)
             
     if not all_chunks:
         return {"disfluencies": [], "summary": {}}
+    
+    print(f"Processing {len(all_chunks)} chunks (reduced from full audio using VAD)")
 
-    # 3. Batch process all chunks
+    # 4. Batch process all chunks
     padded_waveforms = torch.stack(all_chunks).to(device)
     input_attention_mask = (padded_waveforms != 0.0).to(device)
 
@@ -256,7 +331,7 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
     with torch.no_grad():
         features, mask = feature_extractor(padded_waveforms, input_attention_mask)
     
-    # 4. Run inference for all 5 models
+    # 5. Run inference for all 5 models
     all_detections = []
     summary_counts = {
         "blocks": 0,
