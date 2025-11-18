@@ -76,7 +76,7 @@ export default function HomeForm() {
               onChange={e => setPatientQuery(e.target.value)}
               aria-label="Search patients by name"
             />
-            <button className="btn-green" onClick={() => navigate('/Patient')}>ADD NEW PATIENT</button>
+            <button className="btn-green-add" onClick={() => navigate('/Patient')}>ADD NEW PATIENT</button>
           </div>
         </div>
         <p className="patients-sub">Manage patient profiles, track their progress, and celebrate every step toward confident communication.</p>
@@ -85,8 +85,8 @@ export default function HomeForm() {
           {(() => {
             const q = (patientQuery || '').trim().toLowerCase();
             const filtered = q === '' ? patients : patients.filter(p => (`${p.firstName} ${p.lastName}`).toLowerCase().includes(q));
-            if (patients.length === 0) return <div className="patient-empty">No patients yet</div>;
-            if (filtered.length === 0) return <div className="patient-empty">No matching patients</div>;
+            if (patients.length === 0) return null;
+            if (filtered.length === 0) return <div className="patient-empty">No matching patients.</div>;
             return filtered.map((p) => {
              const patientSessions = sessions.filter(s => s.patientId === p.patientId);
              const sessionCount = patientSessions.length;
@@ -140,7 +140,7 @@ export default function HomeForm() {
           </thead>
           <tbody>
             {sessionsForTable.length === 0 && (
-              <tr><td colSpan={3}>No sessions yet</td></tr>
+              <tr><td colSpan={3}>No sessions yet.</td></tr>
             )}
             {sessionsForTable.map((s, i) => (
               <tr key={i}>

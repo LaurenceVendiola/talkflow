@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
-import { LuBookOpenText } from 'react-icons/lu';
 import { FaMicrophone } from 'react-icons/fa';
-import { RiSpeakLine } from 'react-icons/ri';
 import './SessionOptions.css';
 import WavUploader from './WavUploader';
 import Sidebar from '../Sidebar/Sidebar';
@@ -12,8 +10,7 @@ import { analyzeAudioFile, formatAnalysisResults, checkServerHealth } from '../.
 
 export default function SessionOptionsForm() {
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [sessionType, setSessionType] = useState('reading');
-  const [startMethod, setStartMethod] = useState('record');
+  const [startMethod, setStartMethod] = useState(null);
   const [patients, setPatients] = useState([]);
   const [patientQuery, setPatientQuery] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -21,48 +18,80 @@ export default function SessionOptionsForm() {
   const [analysisError, setAnalysisError] = useState('');
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     function load() {
       setPatients(getPatients());
-      // default select first if exists
-      const list = getPatients();
-      if (list.length > 0 && selectedPatient === null) setSelectedPatient(list[0].patientId);
     }
-  load();
-  window.addEventListener('tf:patients-updated', load);
-  return () => window.removeEventListener('tf:patients-updated', load);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);  return (
+    load();
+    window.addEventListener('tf:patients-updated', load);
+    return () => window.removeEventListener('tf:patients-updated', load);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Auto-select patient from navigation state
+    if (location && location.state && location.state.patientId) {
+      setSelectedPatient(location.state.patientId);
+    }
+  }, [location]);
+
+  const handleAnalysisComplete = (session) => {
+    addSession(session);
+    navigate('/Session', { state: { sessionId: session.id } });
+  };
+
+  return (
     <div className="with-sidebar">
       <Sidebar />
       <div className="session-options-root">
-      <header className="so-header">
-        <h1>Start New Session</h1>
-        <p className="so-sub">Select a patient and session type to begin.</p>
-      </header>
+        <div className="session-options-container">
+          <header className="so-header">
+            <h1>Start New Session</h1>
+            <p className="so-sub">Select a patient and begin recording</p>
+          </header>
 
-      <section className="so-section">
-        <h3>1. Select Patient</h3>
+          <section className="so-section">
+        <h3>Select Patient</h3>
         <div className="patient-select-header">
           <div className="patient-select-actions">
             <input
               className="patient-search"
               type="search"
-              placeholder="Search patients..."
+              placeholder="Search patients"
               value={patientQuery}
               onChange={e => setPatientQuery(e.target.value)}
               aria-label="Search patients by name"
             />
           </div>
         </div>
+        
         <div className="patient-list">
+          {patientQuery.trim() === '' && (
+            <button type="button" className="patient-card add-new" onClick={() => navigate('/Patient')}>
+              <div className="patient-avatar plus">+</div>
+              <div className="patient-name">Add New</div>
+            </button>
+          )}
+
           {(() => {
             const q = (patientQuery || '').trim().toLowerCase();
             const filtered = q === '' ? patients : patients.filter(p => (`${p.firstName} ${p.lastName}`).toLowerCase().includes(q));
-            if (patients.length === 0) return <div className="patient-empty">No patients yet — add one first.</div>;
-            if (filtered.length === 0) return <div className="patient-empty">No matching patients</div>;
-            return filtered.map((p) => (
+            
+            // Always show selected patient first (even when not searching)
+            let displayPatients = filtered;
+            if (selectedPatient) {
+              const selected = patients.find(p => p.patientId === selectedPatient);
+              if (selected) {
+                // Remove selected from filtered if present, then add to beginning
+                displayPatients = [selected, ...filtered.filter(p => p.patientId !== selectedPatient)];
+              }
+            }
+            
+            if (patients.length === 0) return null;
+            if (displayPatients.length === 0 && q !== '') return <div className="patient-empty">No matching patients</div>;
+            return displayPatients.map((p) => (
               <button
                 key={p.patientId}
                 className={`patient-card ${selectedPatient === p.patientId ? 'selected' : ''}`}
@@ -73,39 +102,13 @@ export default function SessionOptionsForm() {
               </button>
             ));
           })()}
-
-          <button type="button" className="patient-card add-new" onClick={() => navigate('/Patient')}>
-            <div className="patient-avatar plus">+</div>
-            <div className="patient-name">Add New</div>
-          </button>
         </div>
       </section>
 
-      <section className="so-section">
-        <h3>2. Choose Session Type</h3>
-        <div className="type-row">
-          <button
-            className={`type-card ${sessionType === 'free' ? 'selected' : ''}`}
-            onClick={() => setSessionType('free')}
-          >
-            <div className="type-icon"><RiSpeakLine /></div>
-            <div className="type-title">Free Speech</div>
-            <div className="type-desc">Analyze spontaneous speech.</div>
-          </button>
-
-          <button
-            className={`type-card ${sessionType === 'reading' ? 'selected' : ''}`}
-            onClick={() => setSessionType('reading')}
-          >
-            <div className="type-icon"><LuBookOpenText /></div>
-            <div className="type-title">Reading Passage</div>
-            <div className="type-desc">Use a standardized text.</div>
-          </button>
-        </div>
-      </section>
+      
 
       <section className="so-section start-grid">
-        <h3>3. Start Session</h3>
+        <h3>Start Session</h3>
         <div className="start-row">
           <WavUploader
             className={`upload-card ${startMethod === 'upload' ? 'selected' : ''}`}
@@ -138,7 +141,7 @@ export default function SessionOptionsForm() {
           <button
             type="button"
             className="start-cta"
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || !selectedPatient || !startMethod}
             onClick={async () => {
               if (!selectedPatient) {
                 alert('Please select a patient first');
@@ -147,8 +150,10 @@ export default function SessionOptionsForm() {
 
               setAnalysisError('');
 
-              // For upload method, analyze the file with Python API
-              if (startMethod === 'upload' && uploadedFile) {
+              // For recording method, navigate to RecordingForm
+              if (startMethod === 'record') {
+                navigate('/Recording', { state: { patientId: selectedPatient } });
+              } else if (startMethod === 'upload' && uploadedFile) {
                 setIsAnalyzing(true);
                 try {
                   // Check if server is running
@@ -166,7 +171,6 @@ export default function SessionOptionsForm() {
                     id: `s_${Date.now()}`,
                     patientId: selectedPatient,
                     date: new Date().toLocaleDateString(),
-                    type: sessionType === 'reading' ? 'Reading Passage' : 'Free Speech',
                     method: 'Upload',
                     audioFileName: uploadedFile.name,
                     audioURL: audioURL,
@@ -185,36 +189,16 @@ export default function SessionOptionsForm() {
                 } finally {
                   setIsAnalyzing(false);
                 }
-              } else if (startMethod === 'record') {
-                // For recording method, use mock data for now
-                const soundRepetitions = Math.floor(Math.random() * 10) + 1;
-                const prolongations = Math.floor(Math.random() * 10) + 1;
-                const interjections = Math.floor(Math.random() * 10) + 1;
-                const blocks = Math.floor(Math.random() * 10) + 1;
-                const wordRepetitions = Math.floor(Math.random() * 10) + 1;
-                
-                const session = {
-                  id: `s_${Date.now()}`,
-                  patientId: selectedPatient,
-                  date: new Date().toLocaleDateString(),
-                  type: sessionType === 'reading' ? 'Reading Passage' : 'Free Speech',
-                  method: 'Recording',
-                  results: {
-                    disfluencies: { soundRepetitions, prolongations, interjections, blocks, wordRepetitions }
-                  },
-                  createdAt: new Date().toISOString()
-                };
-                addSession(session);
-                navigate('/Session', { state: { sessionId: session.id } });
               } else {
-                alert('Please upload an audio file or select recording method');
+                alert('Please select a valid option');
               }
             }}
           >
-            {isAnalyzing ? '⏳ Analyzing...' : '▶ Start Session'}
+            {isAnalyzing ? ' Analyzing...' : ' Start Session'}
           </button>
         </div>
       </section>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,230 @@
+.recording-interface {
+  padding: 36px 56px;
+  font-family: 'Nunito', sans-serif;
+  color: #222;
+}
+
+.btn-back {
+  background: #1CB0F6;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px !important;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid #1CB0F6;
+  box-shadow: 0 2px 0 #1899D6;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.recording-header {
+  margin-bottom: 30px;
+}
+
+.recording-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 34px;
+  font-weight: 800;
+  color: #222;
+}
+
+.recording-sub {
+  margin: 6px 0 18px 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.transcript {
+  margin-bottom: 26px;
+}
+
+.transcript-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  line-height: 1.95;
+  color: #333;
+}
+
+.transcript-card p {
+  margin: 0;
+  font-size: 18px;
+  text-align: justify;
+  letter-spacing: 0.2px;
+}
+
+.recording-controls {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  margin-top: 26px;
+}
+
+.timer-display {
+  font-size: 48px;
+  font-weight: 700;
+  color: #333;
+  margin: 20px 0;
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: 2px;
+}
+
+.audio-playback-section {
+  margin: 20px auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.audio-info {
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+}
+
+.audio-player {
+  width: 100%;
+  max-width: 500px;
+  height: 40px;
+  margin-bottom: 0;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.btn-stop,
+.btn-analyze {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-record {
+  background: #58CC02;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px !important;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid #58CC02;
+  box-shadow: 0 2px 0 #429C00;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-record:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-stop {
+  background: #fc4849;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px !important;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid #fc4849;
+  box-shadow: 0 2px 0 #c93939;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-analyze {
+  background: #FF9600;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid #FF9600;
+  box-shadow: 0 2px 0 #EB8A00;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-analyze:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.recording-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .recording-interface {
+    padding: 20px 24px;
+  }
+
+  .timer-display {
+    font-size: 36px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn-record,
+  .btn-stop,
+  .btn-analyze {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .transcript-card {
+    padding: 20px;
+    font-size: 16px;
+  }
+
+  .recording-header h1 {
+    font-size: 28px;
+  }
+
+  .recording-controls {
+    padding: 20px;
+  }
+}

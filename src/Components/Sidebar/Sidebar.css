@@ -171,7 +171,8 @@
   .with-sidebar > .patient-root,
   .with-sidebar > .patient-profile-root,
   .with-sidebar > .session-root,
-  .with-sidebar > .session-options-root {
+  .with-sidebar > .session-options-root,
+  .with-sidebar > .recording-interface {
     margin-left: var(--sidebar-collapsed-width);
     padding: 20px;
   }
@@ -187,7 +188,8 @@
 .with-sidebar > .patient-root,
 .with-sidebar > .patient-profile-root,
 .with-sidebar > .session-root,
-.with-sidebar > .session-options-root {
+.with-sidebar > .session-options-root,
+.with-sidebar > .recording-interface {
   flex: 1;
   min-height: 100vh;
   box-sizing: border-box;

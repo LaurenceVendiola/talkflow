@@ -45,8 +45,9 @@ export default function PatientForm() {
     <div className="with-sidebar">
       <Sidebar />
       <div className="patient-root">
-      <h1>Add New Patient</h1>
-      <p className="patient-sub">Enter the patient's details below to create a new profile.</p>
+        <div className="patient-options-container">
+          <h1>Add New Patient</h1>
+          <p className="patient-sub">Enter the patient's details below to create a new profile.</p>
 
       <form className="patient-form" onSubmit={handleSubmit}>
         <div className="row two">
@@ -91,10 +92,11 @@ export default function PatientForm() {
         </div>
 
         <div className="form-actions">
-          <button type="button" className="btn-cancel" onClick={handleCancel}>Cancel</button>
-          <button type="submit" className="btn-green">Add Patient</button>
+          <button type="button" className="btn-cancel" onClick={handleCancel}>CANCEL</button>
+          <button type="submit" className="btn-green">ADD PATIENT</button>
         </div>
       </form>
+        </div>
       </div>
     </div>
   );

@@ -34,14 +34,14 @@ export async function analyzeAudioFile(audioFile) {
   }
 
   // Validate file type
-  const validTypes = ['audio/wav', 'audio/x-wav', 'audio/mpeg', 'audio/mp3'];
-  const validExtensions = ['.wav', '.mp3'];
-  const fileName = audioFile.name.toLowerCase();
+  const validTypes = ['audio/wav', 'audio/x-wav', 'audio/mpeg', 'audio/mp3', 'audio/webm'];
+  const validExtensions = ['.wav', '.mp3', '.webm'];
+  const fileName = (audioFile.name || 'recorded_audio.webm').toLowerCase();
   const isValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
   const isValidType = validTypes.includes(audioFile.type);
 
   if (!isValidExtension && !isValidType) {
-    throw new Error('Invalid file type. Please upload a .wav or .mp3 file.');
+    throw new Error('Invalid file type. Please upload a .wav, .mp3, or .webm file.');
   }
 
   // Create FormData for file upload

@@ -14,7 +14,7 @@
 }
 
 .home-header h1 {
-  font-size: 40px;
+  font-size: 32px;
   margin: 0;
   font-weight: 700;
 }
@@ -22,7 +22,7 @@
 .home-sub {
   color: #868686;
   margin: 6px 0 18px 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
 
 }
@@ -31,7 +31,7 @@
 
 .overview h3 {
   margin: 10px 0;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
 }
 
@@ -44,7 +44,7 @@
 .stat-card {
   background: white;
   border-radius: 10px;
-  padding: 18px 22px;
+  padding: 16px 20px;
   border: 1px solid #eee;
   box-shadow: none;
   min-width: 120px;
@@ -53,11 +53,11 @@
 .stat-label {
   color: var(--tf-green);
   font-weight: 600;
-  font-size: 20px
+  font-size: 14px
 }
 
 .stat-value {
-  font-size: 64px;
+  font-size: 40px;
   font-weight: 700;
   margin-top: 6px;
 }
@@ -73,46 +73,49 @@
 }
 
 .patients-header h4 {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   margin: 12px 0 0 0;
 }
 
 .patients-actions{display:flex;gap:10px;align-items:center}
-.patient-search{padding:8px 10px;border:1px solid #eee;border-radius:8px;min-width:220px}
-.patient-search:focus{outline:2px solid rgba(83,209,19,0.14);border-color:var(--tf-green)}
+.patient-search{padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;min-width:200px;font-size:14px;font-family:'Nunito',sans-serif;background-color:#f9fafb;transition:all 0.2s ease}
+.patient-search::placeholder{color:#9ca3af}
+.patient-search:hover{border-color:#bfdbfe;background-color:#f3f4f6}
+.patient-search:focus{outline:none;border-color:var(--tf-green);background-color:#fff;box-shadow:0 0 0 3px rgba(83,209,19,0.1)}
 
 .patients-sub {
   color: #868686;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 400;
   margin: 0 0 18px 0;
 }
 
-.btn-green {
+.btn-green-add {
   background: var(--tf-green);
   color: white;
-  width: 200px;
-  height: 44px;
-  padding: 10px 18px;
-  border-radius: 14px !important;
-  font-weight: 800;
-  font-size: 16px;
+  width: 180px;
+  height: auto;
+  padding: 10px 14px;
+  border-radius: 8px !important;
+  font-weight: 700;
+  font-size: 14px;
   border: 1px solid #58CC02; 
-  box-shadow: 0 4px 0 #429C00;
+  box-shadow: 0 2px 0 #429C00;
+  white-space: nowrap;
 }
 
 .btn-orange {
   background: var(--btn-orange);
   color: white;
-  width: 230px;
-  height: 44px;
-  padding: 10px 18px;
-  border-radius: 14px;
-  font-size: 16px;
+  width: 180px;
+  height: 36px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 700;
   border: 1px solid #FF9600; 
-  box-shadow: 0 4px 0 #EB8A00;
+  box-shadow: 0 2px 0 #EB8A00;
 }
 
 .patient-list {
@@ -137,7 +140,7 @@
 
 /* Optional: subtle scrollbar styling for WebKit */
 .patient-list::-webkit-scrollbar{height:8px}
-.patient-list::-webkit-scrollbar-thumb{background:#eee;border-radius:8px}
+.patient-list::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:8px}
 
 .patient-name {
   font-weight: 600;

@@ -25,6 +25,7 @@ export default function SessionForm() {
   const patientName = patient ? `${patient.firstName} ${patient.lastName}` : null;
 
   const [showDeleteSessionModal, setShowDeleteSessionModal] = React.useState(false);
+  const [confidenceThreshold, setConfidenceThreshold] = React.useState(0);
 
   async function handleConfirmDeleteSession() {
     setShowDeleteSessionModal(false);
@@ -67,9 +68,11 @@ export default function SessionForm() {
   // Get sorted detections (oldest to newest)
   const detectionLogs = React.useMemo(() => {
     return session && session.detections 
-      ? [...session.detections].sort((a, b) => a.start - b.start)
+      ? [...session.detections]
+          .filter(d => d.confidence >= confidenceThreshold)
+          .sort((a, b) => a.start - b.start)
       : [];
-  }, [session]);
+  }, [session, confidenceThreshold]);
 
   // Debug: log detections
   React.useEffect(() => {
@@ -95,11 +98,9 @@ export default function SessionForm() {
       <header className="session-header">
         <div style={{width: '100%'}}>
           <div className="session-toolbar">
-            <button className="btn-light" onClick={() => navigate('/SessionOptions')}>Back to Sessions</button>
+            <button className="btn-back" onClick={() => navigate('/SessionOptions')}>BACK TO SESSIONS</button>
             <div style={{marginLeft: 'auto', display: 'flex', gap: 8}}>
-              <button className="btn-light">Export</button>
-              <button className="btn-light">Share</button>
-              <button className="btn-light delete" onClick={() => setShowDeleteSessionModal(true)}>Delete</button>
+              <button className="btn-delete" onClick={() => setShowDeleteSessionModal(true)}>DELETE</button>
             </div>
           </div>
 
@@ -111,21 +112,23 @@ export default function SessionForm() {
           
           {/* Audio playback section */}
           {session && session.audioURL && (
-            <div className="audio-playback-section">
-              <div className="audio-info">
-                <strong>Audio File:</strong> {session.audioFileName || 'Uploaded Audio'}
+            <div className="audio-container">
+              <div className="audio-playback-section">
+                <div className="audio-info">
+                  <strong>Audio File:</strong> {session.audioFileName || 'Uploaded Audio'}
+                </div>
+                <audio controls className="audio-player" src={session.audioURL}>
+                  Your browser does not support the audio element.
+                </audio>
+                
+                {/* Attention Heatmap */}
+                <AttentionHeatmap 
+                  detections={session.detections || []}
+                  duration={session.audioDuration || 30}
+                  width={800}
+                  height={200}
+                />
               </div>
-              <audio controls className="audio-player" src={session.audioURL}>
-                Your browser does not support the audio element.
-              </audio>
-              
-              {/* Attention Heatmap */}
-              <AttentionHeatmap 
-                detections={session.detections || []}
-                duration={session.audioDuration || 30}
-                width={800}
-                height={200}
-              />
             </div>
           )}
         </div>
@@ -137,20 +140,14 @@ export default function SessionForm() {
             <h2>Delete Speech Analysis?</h2>
             <p className="muted">This action cannot be undone. This will permanently delete the speech analysis results for <strong>{patientName || 'this patient'}</strong>.</p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12 }}>
-              <button className="btn-light" onClick={() => setShowDeleteSessionModal(false)}>Cancel</button>
-              <button className="btn-green" onClick={handleConfirmDeleteSession}>Delete</button>
+              <button className="btn-cancel-blue" onClick={() => setShowDeleteSessionModal(false)}>CANCEL</button>
+              <button className="btn-delete" onClick={handleConfirmDeleteSession}>DELETE</button>
             </div>
           </div>
         </div>
       )}
 
       <main>
-        <section className="transcript">
-          <div className="transcript-card">
-            <p>{text}</p>
-          </div>
-        </section>
-
         <section className="results">
           <h3>Results</h3>
           <div className="results-grid">
@@ -166,14 +163,61 @@ export default function SessionForm() {
         {detectionLogs.length > 0 && (
           <section className="detection-logs">
             <h3>Detection Logs</h3>
+            
+            <div className="confidence-filter">
+              <label>Confidence Threshold: {confidenceThreshold}%</label>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value={confidenceThreshold}
+                onChange={(e) => setConfidenceThreshold(Number(e.target.value))}
+                className="confidence-slider"
+                style={{ '--value': `${confidenceThreshold}%` }}
+              />
+              <div className="slider-labels">
+                <span>0%</span>
+                <span>100%</span>
+              </div>
+            </div>
+
             <div className="logs-container">
-              {detectionLogs.map((detection, index) => (
-                <div className="log-entry" key={index}>
-                  <div className="log-timestamp">{formatTimeRange(detection.start, detection.end)}</div>
-                  <div className="log-type">{typeLabels[detection.type] || detection.type}</div>
-                  <div className="log-confidence">{detection.confidence}% confidence</div>
-                </div>
-              ))}
+              {detectionLogs.length > 0 ? (
+                detectionLogs.map((detection, index) => (
+                  <div className="log-entry" key={index}>
+                    <div className="log-timestamp">{formatTimeRange(detection.start, detection.end)}</div>
+                    <div className="log-type">{typeLabels[detection.type] || detection.type}</div>
+                    <div className="log-confidence">{detection.confidence}% confidence</div>
+                  </div>
+                ))
+              ) : (
+                <div className="no-detections">No detections match the selected confidence threshold.</div>
+              )}
+            </div>
+          </section>
+        )} {session && session.detections && session.detections.length > 0 && detectionLogs.length === 0 && (
+          <section className="detection-logs">
+            <h3>Detection Logs</h3>
+            
+            <div className="confidence-filter">
+              <label>Confidence Threshold: {confidenceThreshold}%</label>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value={confidenceThreshold}
+                onChange={(e) => setConfidenceThreshold(Number(e.target.value))}
+                className="confidence-slider"
+                style={{ '--value': `${confidenceThreshold}%` }}
+              />
+              <div className="slider-labels">
+                <span>0%</span>
+                <span>100%</span>
+              </div>
+            </div>
+
+            <div className="logs-container">
+              <div className="no-detections">No detections match the selected confidence threshold.</div>
             </div>
           </section>
         )}

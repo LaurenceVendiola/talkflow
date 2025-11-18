@@ -10,6 +10,7 @@ import SignUpForm from './Components/SignUp/SignUpForm';
 import { AuthProvider } from './context/AuthProvider';
 import ProtectedRoute from './Components/ProtectedRoute';
 import ForgotPasswordForm from './Components/ForgotPassword/ForgotPasswordForm';
+import RecordingForm from './Components/Session/RecordingForm';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/Patient" element={<ProtectedRoute><PatientForm/></ProtectedRoute>}/>
           <Route path="/Session" element={<ProtectedRoute><SessionForm/></ProtectedRoute>}/>
           <Route path="/SessionOptions" element={<ProtectedRoute><SessionOptionsForm/></ProtectedRoute>}/>
+          <Route path="/Recording" element={<ProtectedRoute><RecordingForm/></ProtectedRoute>}/>
           <Route path="/PatientProfile" element={<ProtectedRoute><PatientProfileForm/></ProtectedRoute>}/>
         </Routes>
       </AuthProvider>

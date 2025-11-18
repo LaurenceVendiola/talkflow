@@ -35,7 +35,7 @@ export default function WavUploader({ onFileSelected, maxSizeBytes = 10 * 1024 *
     inputRef.current && inputRef.current.click();
   };
 
-  // Accept both WAV and MP3 formats by extension or common MIME types
+  // Accept WAV, MP3, and WebM formats by extension or common MIME types
   const isAcceptedAudio = f => {
     if (!f) return false;
     const name = (f.name || '').toLowerCase();
@@ -43,10 +43,12 @@ export default function WavUploader({ onFileSelected, maxSizeBytes = 10 * 1024 *
     return (
       name.endsWith('.wav') ||
       name.endsWith('.mp3') ||
+      name.endsWith('.webm') ||
       type === 'audio/wav' ||
       type === 'audio/x-wav' ||
       type === 'audio/mpeg' ||
-      type === 'audio/mp3'
+      type === 'audio/mp3' ||
+      type === 'audio/webm'
     );
   };
 

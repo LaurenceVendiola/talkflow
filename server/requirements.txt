@@ -4,6 +4,7 @@ transformers
 fastapi
 uvicorn
 librosa
+pydub
 numpy
 python-multipart
 audioread

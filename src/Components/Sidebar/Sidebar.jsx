@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { FaHome } from 'react-icons/fa';
 import { PiUsersThreeFill, PiUserSoundFill } from 'react-icons/pi';
 import logo from './talkflow_logo_sidebar.png';
@@ -12,8 +12,15 @@ import { auth } from '../../firebaseConfig';
 const Sidebar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [viewProfileOpen, setViewProfileOpen] = useState(false);
+
+  // Check if current route is a sessions-related route
+  const isSessionsActive = ['/SessionOptions', '/Recording', '/Session'].includes(location.pathname);
+  
+  // Check if current route is a dashboard-related route
+  const isDashboardActive = ['/Home', '/PatientProfile'].includes(location.pathname);
 
   // Display name: firstName + space + first letter of lastName + '.'
   const displayName = user
@@ -38,7 +45,7 @@ const Sidebar = () => {
       <nav className="sidebar-nav">
         <NavLink
           to="/Home"
-          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          className={isDashboardActive ? 'nav-item active' : 'nav-item'}
         >
           <FaHome className="nav-icon" />
           <span className="nav-label">DASHBOARD</span>
@@ -54,7 +61,7 @@ const Sidebar = () => {
 
         <NavLink
           to="/SessionOptions"
-          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          className={isSessionsActive ? 'nav-item active' : 'nav-item'}
         >
           <PiUserSoundFill className="nav-icon" />
           <span className="nav-label">SESSIONS</span>

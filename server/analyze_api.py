@@ -7,17 +7,17 @@ from pathlib import Path
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import librosa
 import numpy as np
 import io
-from typing import List, Dict, Any
+from typing import Dict, Any
+from pydub import AudioSegment
 
 # --- Configuration ---
 TARGET_SR = 16000
 CHUNK_SIZE_SEC = 3.0  # Analyze in 3-second chunks
 STEP_SIZE_SEC = 1.0   # With a 1-second step (2-second overlap)
 TASKS = ["block", "wordrep", "soundrep", "prolongation", "interjection"]
-MODEL_DIR = "src/Components/wavlm_models"  # WavLM trained models (from project root)
+MODEL_DIR = "../src/Components/wavlm_models"  # WavLM trained models (relative to server directory)
 
 # Model Hyperparameters (MUST match what you trained with)
 LSTM_HIDDEN_DIM = 128
@@ -197,7 +197,7 @@ def load_models():
 @app.post("/analyze")
 async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
     """
-    Analyzes an audio file (.wav or .mp3) for all 5 disfluency types.
+    Analyzes an audio file (.wav, .mp3, or .webm) for all 5 disfluency types.
     Returns detected disfluencies and summary counts.
     """
     if not feature_extractor or not model_bank:
@@ -205,23 +205,32 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
     
     # Validate file type
     filename = file.filename.lower()
-    if not (filename.endswith('.wav') or filename.endswith('.mp3')):
-        raise HTTPException(status_code=400, detail="Only .wav and .mp3 files are supported")
+    if not (filename.endswith('.wav') or filename.endswith('.mp3') or filename.endswith('.webm')):
+        raise HTTPException(status_code=400, detail="Only .wav, .mp3, and .webm files are supported")
     
-    # 1. Read and load audio file
+    # 1. Read and load audio file using pydub
     try:
         contents = await file.read()
-        # Load with librosa (auto-resamples to TARGET_SR and handles both wav/mp3)
-        # Note: MP3 support requires ffmpeg or audioread backend
-        waveform, _ = librosa.load(io.BytesIO(contents), sr=TARGET_SR, mono=True)
+        
+        # Use pydub to load audio file (supports WebM, MP3, WAV, OGG, FLAC)
+        audio = AudioSegment.from_file(io.BytesIO(contents))
+        
+        # Convert to mono if stereo
+        if audio.channels > 1:
+            audio = audio.set_channels(1)
+        
+        # Resample to TARGET_SR if needed
+        if audio.frame_rate != TARGET_SR:
+            audio = audio.set_frame_rate(TARGET_SR)
+        
+        # Convert to numpy array
+        samples = np.array(audio.get_array_of_samples(), dtype=np.float32)
+        
+        # Normalize to [-1, 1] range
+        waveform = samples / 32768.0
+        
     except Exception as e:
-        error_msg = str(e)
-        if 'mp3' in filename and ('audioread' in error_msg or 'decode' in error_msg):
-            raise HTTPException(
-                status_code=400, 
-                detail="MP3 file could not be processed. Install ffmpeg or convert to WAV format."
-            )
-        raise HTTPException(status_code=400, detail=f"Could not read audio file: {error_msg}")
+        raise HTTPException(status_code=400, detail=f"Could not read audio file: {str(e)}")
 
     # 2. Create sliding window chunks
     chunk_samples = int(CHUNK_SIZE_SEC * TARGET_SR)

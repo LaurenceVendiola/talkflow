@@ -107,8 +107,8 @@ function PatientEditor({ patient, setPatient, forceEdit, onEditingChange }) {
           <label className="form-row full"><span className="label">Notes</span><textarea className="tf-textarea" value={form.notes} onChange={e => updateField('notes', e.target.value)} /></label>
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-            <button type="button" className="btn-light" onClick={onCancel}>Cancel</button>
-            <button type="submit" className="btn-green">Save</button>
+            <button type="button" className="btn-cancel" onClick={onCancel}>CANCEL</button>
+            <button type="submit" className="btn-green">SAVE</button>
           </div>
         </form>
       )}
@@ -176,7 +176,7 @@ export default function PatientProfileForm() {
           </div>
 
           <div className="pp-actions">
-            <button className="btn-green" onClick={() => navigate('/SessionOptions')}>New Session</button>
+            <button className="btn-green" onClick={() => navigate('/SessionOptions', { state: { patientId: patient.patientId } })}>NEW SESSION</button>
           </div>
         </header>
 
@@ -211,8 +211,8 @@ export default function PatientProfileForm() {
                     <li>Session records</li>
                   </ul>
                   <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12 }}>
-                    <button className="btn-light" onClick={() => setShowDeleteModal(false)}>Cancel</button>
-                    <button className="btn-green" onClick={handleConfirmDelete}>Delete</button>
+                    <button className="btn-cancel-blue" onClick={() => setShowDeleteModal(false)}>CANCEL</button>
+                    <button className="btn-delete" onClick={handleConfirmDelete}>DELETE</button>
                   </div>
                 </div>
               </div>
@@ -271,12 +271,15 @@ export default function PatientProfileForm() {
 
           <div className="pp-right">
             <h3>Session History</h3>
+            {sessions.length === 0 ? (
+              <div>No session yet.</div>
+            ) : (
             <div className="session-list">
               {sessions.map(s => (
                 <div key={s.id} className="session-card">
                   <div className="session-head">
                     <div className="session-date">{s.date}</div>
-                    <div className="session-type">{s.type} · {s.method}</div>
+                    <div className="session-type">{s.type}  {s.method}</div>
                   </div>
 
                   <div className="session-body">
@@ -290,11 +293,12 @@ export default function PatientProfileForm() {
                   </div>
 
                   <div className="session-actions">
-                    <button className="btn-light" onClick={() => navigate('/Session', { state: { sessionId: s.id } })}>View</button>
+                    <button className="btn-blue" onClick={() => navigate('/Session', { state: { sessionId: s.id } })}>VIEW</button>
                   </div>
                 </div>
               ))}
             </div>
+            )}
           </div>
         </section>
       </div>
