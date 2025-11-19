@@ -13,6 +13,18 @@ export default function PatientForm() {
   const [notes, setNotes] = useState('');
   const navigate = useNavigate();
 
+  // Check if form is valid - all required fields must be filled
+  const isFormValid = firstName.trim() !== '' && 
+                      lastName.trim() !== '' && 
+                      age.trim() !== '' && 
+                      dob !== '' && 
+                      gender !== '';
+
+  // Handle first/last name input - only allow alphabet characters and spaces
+  const handleNameChange = (value) => {
+    return value.replace(/[^a-zA-Z\s]/g, '');
+  };
+
   const handleCancel = () => {
     setFirstName('');
     setLastName('');
@@ -24,6 +36,8 @@ export default function PatientForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isFormValid) return;
+    
     // create a patient with unique id
     const patient = {
       patientId: `p_${Date.now()}`,
@@ -32,7 +46,7 @@ export default function PatientForm() {
       age: age ? Number(age) : null,
       dob,
       gender,
-      notes
+      notes: notes.trim()
     };
     savePatient(patient);
     // navigate to profile for the created patient
@@ -53,47 +67,87 @@ export default function PatientForm() {
         <div className="row two">
           <div className="field">
             <label>First Name</label>
-            <input className="input" placeholder="e.g., John" value={firstName} onChange={(e)=>setFirstName(e.target.value)} />
+            <input 
+              className="input" 
+              placeholder="e.g., John" 
+              value={firstName} 
+              onChange={(e) => setFirstName(handleNameChange(e.target.value))}
+              required
+            />
           </div>
           <div className="field">
             <label>Last Name</label>
-            <input className="input" placeholder="e.g., Doe" value={lastName} onChange={(e)=>setLastName(e.target.value)} />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="field full">
-            <label>Age</label>
-            <input className="input" type="number" min="0" placeholder="e.g., 8" value={age} onChange={(e)=>setAge(e.target.value)} />
+            <input 
+              className="input" 
+              placeholder="e.g., Doe" 
+              value={lastName} 
+              onChange={(e) => setLastName(handleNameChange(e.target.value))}
+              required
+            />
           </div>
         </div>
 
         <div className="row two">
           <div className="field">
-            <label>Date of Birth</label>
-            <input className="input" type="date" value={dob} onChange={(e)=>setDob(e.target.value)} />
+            <label>Age</label>
+            <input 
+              className="input" 
+              type="number" 
+              min="0" 
+              max="120"
+              placeholder="e.g., 8" 
+              value={age} 
+              onChange={(e) => setAge(e.target.value)}
+              required
+            />
           </div>
           <div className="field">
-            <label>Gender</label>
-            <select className="select" value={gender} onChange={(e)=>setGender(e.target.value)}>
-              <option value="">Select Gender</option>
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
-            </select>
+            <label>Date of Birth</label>
+            <input 
+              className="input" 
+              type="date" 
+              value={dob} 
+              onChange={(e) => setDob(e.target.value)}
+              required
+            />
           </div>
         </div>
 
-        <div className="row">
-          <div className="field full">
+        <div className="row two">
+          <div className="field">
+            <label>Gender</label>
+            <select 
+              className="select" 
+              value={gender} 
+              onChange={(e) => setGender(e.target.value)}
+              required
+            >
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div className="field">
             <label>Initial Notes</label>
-            <textarea className="textarea" placeholder="Any initial observations or background information..." value={notes} onChange={(e)=>setNotes(e.target.value)} />
+            <textarea 
+              className="textarea" 
+              placeholder="Any initial observations or background information." 
+              value={notes} 
+              onChange={(e) => setNotes(e.target.value)}
+            />
           </div>
         </div>
 
         <div className="form-actions">
-          <button type="button" className="btn-cancel" onClick={handleCancel}>CANCEL</button>
-          <button type="submit" className="btn-green">ADD PATIENT</button>
+          <button type="button" className="btn-cancel" onClick={handleCancel}>CLEAR</button>
+          <button 
+            type="submit" 
+            className="btn-green" 
+            disabled={!isFormValid}
+          >
+            ADD PATIENT
+          </button>
         </div>
       </form>
         </div>

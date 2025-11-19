@@ -44,13 +44,19 @@ export default function SessionForm() {
     }
   }
 
-  const results = session ? [
-    { label: 'Sound Repetitions', value: session.results.disfluencies.soundRepetitions },
-    { label: 'Word Repetitions', value: session.results.disfluencies.wordRepetitions },
-    { label: 'Prolongations', value: session.results.disfluencies.prolongations },
-    { label: 'Interjections', value: session.results.disfluencies.interjections },
-    { label: 'Blocks', value: session.results.disfluencies.blocks }
-  ] : [];
+  const results = React.useMemo(() => {
+    if (!session || !session.detections) return [];
+    
+    const filteredDetections = session.detections.filter(d => d.confidence >= confidenceThreshold);
+    
+    return [
+      { label: 'Sound Repetitions', value: filteredDetections.filter(d => d.type === 'SND').length },
+      { label: 'Word Repetitions', value: filteredDetections.filter(d => d.type === 'WP').length },
+      { label: 'Prolongations', value: filteredDetections.filter(d => d.type === 'Pro').length },
+      { label: 'Interjections', value: filteredDetections.filter(d => d.type === 'Intrj').length },
+      { label: 'Blocks', value: filteredDetections.filter(d => d.type === 'Block').length }
+    ];
+  }, [session, confidenceThreshold]);
 
   // Format timestamp as MM:SS.mmm
   const formatTimestamp = (seconds) => {
@@ -150,6 +156,7 @@ export default function SessionForm() {
       <main>
         <section className="results">
           <h3>Results</h3>
+          <p className="results-subtitle">Displays the total count of detected stuttering events (e.g., repetitions, blocks, prolongations) for the session.</p>
           <div className="results-grid">
             {results.map((r) => (
               <div className="result-card" key={r.label}>
@@ -163,6 +170,7 @@ export default function SessionForm() {
         {detectionLogs.length > 0 && (
           <section className="detection-logs">
             <h3>Detection Logs</h3>
+            <p className="detection-logs-subtitle">Lists detected events with timestamps and confidence scores. Filter results using the confidence threshold slider.</p>
             
             <div className="confidence-filter">
               <label>Confidence Threshold: {confidenceThreshold}%</label>
@@ -198,6 +206,7 @@ export default function SessionForm() {
         )} {session && session.detections && session.detections.length > 0 && detectionLogs.length === 0 && (
           <section className="detection-logs">
             <h3>Detection Logs</h3>
+            <p className="detection-logs-subtitle">Lists detected events with timestamps and confidence scores. Filter results using the confidence threshold slider.</p>
             
             <div className="confidence-filter">
               <label>Confidence Threshold: {confidenceThreshold}%</label>

@@ -30,7 +30,7 @@
 
 .patient-form {
   background: var(--card-bg);
-  padding: 18px;
+  padding: 24px;
   border-radius: 10px;
   border: 1px solid #f0f0f0;
 }
@@ -38,37 +38,65 @@
 .row {
   display: flex;
   gap: 16px;
-  margin-bottom: 14px;
+  margin-bottom: 20px;
+}
+
+.row.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .row.two .field {
-  flex: 1;
+  min-width: 0;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
-.field.full {
-  flex: 1;
+.field label {
+  font-weight: 800;
+  font-size: 14px;
+  color: #333;
+  font-family: 'Nunito', sans-serif;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
 }
 
-.input {
+/* Uniform styling for all form inputs */
+.input,
+.select,
+.textarea,
+input[type="date"],
+input[type="time"] {
+  border: 1px solid #d1d5db;
+  background: #f9fafb !important;
+  color: #222;
+  transition: all 0.2s ease;
+  font-family: 'Nunito', sans-serif;
+  margin: 5px !important
+}
+
+.input::placeholder,
+.textarea::placeholder,
+.select option[value=""],
+input[type="date"]:invalid {
+  color: #9ca3af;
+}
+
+.input,
+input[type="date"],
+input[type="time"] {
   height: 44px;
   padding: 10px 14px;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
   font-size: 14px;
   font-family: 'Nunito', sans-serif;
-  color: #222;
-  transition: all 0.2s ease;
-}
-
-.input::placeholder {
-  color: #9ca3af;
 }
 
 .input:hover {
@@ -85,16 +113,33 @@
 
 input[type="date"],
 input[type="time"] {
-  height: 44px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
-  font-size: 14px;
-  font-family: 'Nunito', sans-serif;
-  color: #222;
-  transition: all 0.2s ease;
   cursor: pointer;
+}
+
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #9ca3af;
+}
+
+input[type="date"]:focus::-webkit-datetime-edit-text,
+input[type="date"]:focus::-webkit-datetime-edit-month-field,
+input[type="date"]:focus::-webkit-datetime-edit-day-field,
+input[type="date"]:focus::-webkit-datetime-edit-year-field,
+input[type="date"]:valid::-webkit-datetime-edit-text,
+input[type="date"]:valid::-webkit-datetime-edit-month-field,
+input[type="date"]:valid::-webkit-datetime-edit-day-field,
+input[type="date"]:valid::-webkit-datetime-edit-year-field {
+  color: #222;
+}
+
+.row.two .input,
+.row.two .select,
+.row.two .textarea,
+.row.two input[type="date"] {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 input[type="date"]:hover,
@@ -115,19 +160,27 @@ input[type="time"]:focus {
   height: 44px;
   padding: 10px 14px;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
   font-size: 14px;
   font-family: 'Nunito', sans-serif;
-  color: #222;
   cursor: pointer;
-  transition: all 0.2s ease;
   appearance: none;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 16px;
   padding-right: 32px;
+}
+
+.select option[value=""] {
+  color: #9ca3af;
+}
+
+.select:invalid {
+  color: #9ca3af;
+}
+
+.select:valid {
+  color: #222;
 }
 
 .select:hover {
@@ -148,13 +201,9 @@ input[type="time"]:focus {
   min-height: 120px;
   padding: 12px 14px;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
   font-size: 14px;
   font-family: 'Nunito', sans-serif;
-  color: #222;
   resize: vertical;
-  transition: all 0.2s ease;
 }
 
 .textarea::placeholder {
@@ -189,6 +238,13 @@ input[type="time"]:focus {
   font-weight: 700;
   font-size: 14px;
   box-shadow: 0 2px 0 #c93939;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
 }
 
 .btn-green {
@@ -200,6 +256,13 @@ input[type="time"]:focus {
   font-size: 14px;
   border: 1px solid #58CC02;
   box-shadow: 0 2px 0 #429C00;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-green:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 @media (max-width: 900px) {

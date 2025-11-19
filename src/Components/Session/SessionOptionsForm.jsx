@@ -59,7 +59,7 @@ export default function SessionOptionsForm() {
             <input
               className="patient-search"
               type="search"
-              placeholder="Search patients"
+              placeholder="Search Patients"
               value={patientQuery}
               onChange={e => setPatientQuery(e.target.value)}
               aria-label="Search patients by name"
@@ -108,7 +108,7 @@ export default function SessionOptionsForm() {
       
 
       <section className="so-section start-grid">
-        <h3>Start Session</h3>
+        <h3>Choose Your Approach</h3>
         <div className="start-row">
           <WavUploader
             className={`upload-card ${startMethod === 'upload' ? 'selected' : ''}`}
@@ -194,7 +194,7 @@ export default function SessionOptionsForm() {
               }
             }}
           >
-            {isAnalyzing ? ' Analyzing...' : ' Start Session'}
+            {isAnalyzing ? ' ANALYZING' : 'START SESSION'}
           </button>
         </div>
       </section>
