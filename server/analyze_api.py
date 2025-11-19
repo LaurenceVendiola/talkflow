@@ -18,7 +18,7 @@ TARGET_SR = 16000
 CHUNK_SIZE_SEC = 3.0  # Analyze in 3-second chunks
 STEP_SIZE_SEC = 1.0   # With a 1-second step (2-second overlap)
 TASKS = ["block", "wordrep", "soundrep", "prolongation", "interjection"]
-MODEL_DIR = "src/Components/wavlm_models"  # WavLM trained models (relative to server directory)
+MODEL_DIR = "../src/Components/wavlm_models"  # WavLM trained models (relative to server directory)
 
 # Model Hyperparameters (MUST match what you trained with)
 LSTM_HIDDEN_DIM = 128
