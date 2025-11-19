@@ -25,7 +25,7 @@ export default function SessionForm() {
   const patientName = patient ? `${patient.firstName} ${patient.lastName}` : null;
 
   const [showDeleteSessionModal, setShowDeleteSessionModal] = React.useState(false);
-  const [confidenceThreshold, setConfidenceThreshold] = React.useState(0);
+  const [confidenceThreshold, setConfidenceThreshold] = React.useState(50);
 
   async function handleConfirmDeleteSession() {
     setShowDeleteSessionModal(false);
