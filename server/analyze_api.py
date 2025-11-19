@@ -236,8 +236,13 @@ def detect_speech_regions(waveform: np.ndarray, sr: int = 16000, threshold: floa
         
         # If no speech detected, return entire audio
         if not speech_timestamps:
+            del audio_tensor
+            torch.cuda.empty_cache()
             return [(0.0, len(waveform) / sr)]
         
+        # Free memory
+        del audio_tensor
+        torch.cuda.empty_cache()
         return speech_timestamps
         
     except Exception as e:
@@ -383,6 +388,16 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
 
     # 5. Return results with summary and duration
     duration = len(waveform) / TARGET_SR
+    
+    # Memory cleanup - critical to prevent server crash
+    import gc
+    try:
+        del features, padded_waveforms, input_attention_mask
+        torch.cuda.empty_cache()
+        gc.collect()
+    except:
+        pass
+    
     return {
         "disfluencies": all_detections,
         "summary": summary_counts,
