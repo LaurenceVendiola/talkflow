@@ -1,4 +1,6 @@
-# Getting Started with Create React App
+# TalkFlow - Speech Disfluency Analysis System
+
+TalkFlow is an AI-powered web application for detecting and analyzing speech disfluencies (stuttering patterns) in audio recordings. Built with React and FastAPI, it uses deep learning models based on WavLM and LSTM networks to identify five types of disfluencies: blocks, word repetitions, sound repetitions, prolongations, and interjections.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

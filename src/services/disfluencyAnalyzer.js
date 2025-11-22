@@ -1,9 +1,8 @@
 /**
  * Disfluency Analyzer Service
- * Handles communication with the Python FastAPI backend for audio analysis
+ * Handles communication with the Python FastAPI backend (AWS EC2) for audio analysis
  */
 
-// Use environment variable for API URL (set in Vercel), fallback to local
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8001';
 
 /**
@@ -19,13 +18,13 @@ export async function checkServerHealth() {
     return await response.json();
   } catch (error) {
     console.error('Health check error:', error);
-    throw new Error('Analysis server is not running. Please start the Python server first.');
+    throw new Error('Cannot connect to analysis server. Please check your internet connection or contact support.');
   }
 }
 
 /**
  * Analyze an audio file for disfluencies
- * @param {File} audioFile - The audio file to analyze (.wav or .mp3)
+ * @param {File} audioFile - The audio file to analyze (.wav, .mp3, .webm, .ogg, .flac)
  * @returns {Promise<Object>} Analysis results with disfluencies array and summary
  */
 export async function analyzeAudioFile(audioFile) {
@@ -33,18 +32,16 @@ export async function analyzeAudioFile(audioFile) {
     throw new Error('No audio file provided');
   }
 
-  // Validate file type
-  const validTypes = ['audio/wav', 'audio/x-wav', 'audio/mpeg', 'audio/mp3', 'audio/webm'];
-  const validExtensions = ['.wav', '.mp3', '.webm'];
+  const validTypes = ['audio/wav', 'audio/x-wav', 'audio/mpeg', 'audio/mp3', 'audio/webm', 'audio/ogg', 'audio/flac'];
+  const validExtensions = ['.wav', '.mp3', '.webm', '.ogg', '.flac'];
   const fileName = (audioFile.name || 'recorded_audio.webm').toLowerCase();
   const isValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
   const isValidType = validTypes.includes(audioFile.type);
 
   if (!isValidExtension && !isValidType) {
-    throw new Error('Invalid file type. Please upload a .wav, .mp3, or .webm file.');
+    throw new Error('Invalid file type. Please upload a .wav, .mp3, .webm, .ogg, or .flac file.');
   }
 
-  // Create FormData for file upload
   const formData = new FormData();
   formData.append('file', audioFile);
 
@@ -64,7 +61,7 @@ export async function analyzeAudioFile(audioFile) {
   } catch (error) {
     console.error('Analysis error:', error);
     if (error.message.includes('fetch')) {
-      throw new Error('Cannot connect to analysis server. Please ensure the Python server is running.');
+      throw new Error('Cannot connect to analysis server. Please check your internet connection.');
     }
     throw error;
   }

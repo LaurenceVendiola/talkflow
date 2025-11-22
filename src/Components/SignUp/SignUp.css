@@ -1,4 +1,3 @@
-/* SignUp styles copied from LogIn and reused */
 :root{
 	--tf-green: #53d113;
 	--tf-green-2: #5be81a;
@@ -14,13 +13,12 @@
 	display:flex;
 	min-height:100vh;
 	font-family: 'Nunito', sans-serif;
-	/* full-page gradient background so both columns share it */
 	background: linear-gradient(135deg, var(--tf-green) 0%, var(--tf-green-2) 100%);
 }
 
 .login-left{
 	flex:1.1;
-	padding:64px 80px 64px 160px; /* increase left padding so left panel content shifts right */
+	padding:64px 80px 64px 160px;
 	color:white;
 	display:flex;
 	flex-direction:column;
@@ -151,7 +149,6 @@
     font-weight: 700;
 }
 
-/* Disabled state for primary button */
 .btn-primary:disabled,
 .btn-primary[disabled] {
 	background: var(--btn-disabled);
@@ -165,7 +162,6 @@
   font-size: 14px;
 }
 
-/* Inline field-level error tooltip */
 .field-error{
 	width: 404px;
 	margin: 6px 0 0 0;
@@ -179,7 +175,6 @@
 	font-size: 13px;
 }
 
-/* Tooltip-style field errors */
 .field{
 	position: relative;
 }
@@ -202,7 +197,6 @@
 	box-shadow: 0 6px 14px rgba(0,0,0,0.08);
 }
 
-/* Global tooltip (renders under the form fields) */
 .field-tooltip.global{
 	position: relative;
 	top: 0;
@@ -210,7 +204,6 @@
 	margin-top: 8px;
 }
 
-/* small arrow pointing to the field */
 .field-tooltip::before{
 	content: "";
 	position: absolute;
@@ -219,15 +212,13 @@
 	width: 12px;
 	height: 8px;
 	background: transparent;
-	/* triangle pointing up using clip-path (reliable across browsers) */
 	-webkit-clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 	clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 	background: #f8d7da;
 }
 
-/* Success fill for matched password inputs */
 .input-match{
-  background: rgba(83,209,19,0.10) !important; /* subtle green tint */
+  background: rgba(83,209,19,0.10) !important;
   border-color: var(--tf-green) !important;
   box-shadow: 0 6px 18px rgba(83,209,19,0.12);
   transition: background 150ms ease, box-shadow 150ms ease, border-color 150ms ease;

@@ -80,14 +80,6 @@ export default function SessionForm() {
       : [];
   }, [session, confidenceThreshold]);
 
-  // Debug: log detections
-  React.useEffect(() => {
-    if (session) {
-      console.log('Session detections:', session.detections);
-      console.log('Detection logs:', detectionLogs);
-    }
-  }, [session, detectionLogs]);
-
   // Map short type names to full labels
   const typeLabels = {
     'Block': 'Block',

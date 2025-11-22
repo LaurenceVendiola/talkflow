@@ -24,7 +24,6 @@ export default function RecordingForm() {
   const timerIntervalRef = useRef(null);
   const streamRef = useRef(null);
 
-  // Timer effect
   useEffect(() => {
     if (isRecording) {
       timerIntervalRef.current = setInterval(() => {
@@ -42,7 +41,6 @@ export default function RecordingForm() {
     };
   }, [isRecording]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (streamRef.current) {
@@ -82,8 +80,6 @@ export default function RecordingForm() {
 
       mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        console.log('Blob created with type:', blob.type);
-        console.log('Blob size:', blob.size, 'bytes');
         setRecordedBlob(blob);
         stream.getTracks().forEach(track => track.stop());
       };
@@ -119,26 +115,12 @@ export default function RecordingForm() {
     setError('');
 
     try {
-      console.log('=== Starting Analysis ===');
-      console.log('Blob type:', recordedBlob.type);
-      console.log('Blob size:', recordedBlob.size);
-      
-      // Check server health
       await checkServerHealth();
-
-      // Create a File object from the Blob with proper filename
       const audioFile = new File([recordedBlob], 'recording.webm', { type: 'audio/webm' });
-      console.log('Created File object:', audioFile.name, audioFile.type);
-
-      // Analyze the recorded audio
       const analysisResult = await analyzeAudioFile(audioFile);
-      console.log('Analysis result:', analysisResult);
       const formattedResults = formatAnalysisResults(analysisResult);
-
-      // Create audio URL for playback
       const audioURL = URL.createObjectURL(recordedBlob);
 
-      // Create session with real analysis results
       const session = {
         id: `s_${Date.now()}`,
         patientId: selectedPatient,

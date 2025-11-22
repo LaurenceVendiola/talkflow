@@ -5,11 +5,11 @@ import { auth } from '../firebaseConfig';
 
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  // While the auth provider is determining state, don't render anything.
-  if (loading) return null; // or a spinner
+  // Wait for authentication state to initialize before rendering
+  if (loading) return null;
 
-  // If context says no user, but Firebase's auth has a currentUser (sign-in in progress
-  // or profile still loading), allow access to avoid a redirect race.
+  // Allow access if Firebase auth is in progress to prevent redirect race conditions
+  // This handles the brief moment between Firebase sign-in and user profile loading
   if (!user) {
     if (auth && auth.currentUser) {
       return children;

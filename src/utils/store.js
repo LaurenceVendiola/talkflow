@@ -1,4 +1,4 @@
-// Firestore-backed store for patients and sessions (per-user scoped)
+// Provides Firestore-backed storage for patients and sessions with per-user scoping
 import { db, auth } from '../firebaseConfig';
 import firebase from 'firebase/compat/app';
 
@@ -36,13 +36,11 @@ function _initListenersForUser(uid) {
   currentUid = uid;
 
   if (!uid) {
-    // not signed in -> clear caches and exit
     _clearCaches();
     return;
   }
 
   try {
-    // patients listener scoped to ownerId
     patientsUnsub = db.collection('patients')
       .where('ownerId', '==', uid)
       .onSnapshot(snap => {
@@ -54,7 +52,6 @@ function _initListenersForUser(uid) {
         console.error('patients snapshot error', err && err.message);
       });
 
-    // sessions listener scoped to ownerId
     sessionsUnsub = db.collection('sessions')
       .where('ownerId', '==', uid)
       .onSnapshot(snap => {
@@ -71,14 +68,13 @@ function _initListenersForUser(uid) {
   }
 }
 
-// Called by AuthProvider when auth state changes so we can re-subscribe
+// Re-initializes Firestore listeners when authentication state changes
 export function setCurrentUser(uid) {
   _initListenersForUser(uid);
 }
 
-// Public API (synchronous getters return current in-memory cache)
+// Returns cached patients for the current user
 export function getPatients() {
-  // ensure listeners are initialized for current auth state
   if (currentUid === null && auth && auth.currentUser) {
     _initListenersForUser(auth.currentUser.uid);
   }
@@ -86,7 +82,6 @@ export function getPatients() {
 }
 
 export function savePatient(patient) {
-  // optimistic local update
   patientsCache = [patient, ...patientsCache.filter(p => p.patientId !== patient.patientId)];
   window.dispatchEvent(new Event('tf:patients-updated'));
 
@@ -104,7 +99,6 @@ export function savePatient(patient) {
 }
 
 export async function clearPatients() {
-  // delete current user's patient documents - use with caution
   const uid = (auth && auth.currentUser && auth.currentUser.uid) || currentUid;
   if (!uid) return;
   try {
@@ -119,15 +113,11 @@ export async function clearPatients() {
 
 export async function deletePatient(patientId) {
   if (!patientId) return;
-  // optimistic local update
   patientsCache = patientsCache.filter(p => p.patientId !== patientId);
   window.dispatchEvent(new Event('tf:patients-updated'));
 
   try {
-    // delete patient doc (assumes security rules enforce ownership)
     await db.collection('patients').doc(patientId).delete();
-
-    // delete related sessions belonging to current user
     const uid = (auth && auth.currentUser && auth.currentUser.uid) || currentUid;
   const snap = await db.collection('sessions').where('patientId', '==', patientId).where('ownerId', '==', uid).get();
     if (!snap.empty) {
@@ -136,7 +126,6 @@ export async function deletePatient(patientId) {
       await batch.commit();
     }
 
-    // update sessions cache and notify
     sessionsCache = sessionsCache.filter(s => s.patientId !== patientId);
     window.dispatchEvent(new Event('tf:sessions-updated'));
   } catch (e) {
@@ -152,7 +141,6 @@ export function getSessions() {
 }
 
 export function addSession(session) {
-  // optimistic local update
   sessionsCache = [session, ...sessionsCache.filter(s => s.id !== session.id)];
   window.dispatchEvent(new Event('tf:sessions-updated'));
 
@@ -187,7 +175,6 @@ export function findSessionById(id) {
 
 export async function deleteSession(sessionId) {
   if (!sessionId) return;
-  // optimistic local update
   sessionsCache = sessionsCache.filter(s => s.id !== sessionId);
   window.dispatchEvent(new Event('tf:sessions-updated'));
 

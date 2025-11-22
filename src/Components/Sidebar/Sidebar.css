@@ -1,4 +1,3 @@
-/* Sidebar styles - left navigation */
 :root {
   --tf-green: #58CC02;
   --muted: #868686;
@@ -28,7 +27,7 @@
 .sidebar-top {
   display: flex;
   align-items: center;
-  justify-content: center; /* center logo + wordmark horizontally */
+  justify-content: center;
   gap: 12px;
   padding-bottom: 18px;
   margin-bottom: 6px;
@@ -61,16 +60,39 @@
   padding-top: 12px;
 }
 
-/* Sidebar menu pop */
-.sidebar-menu-pop{position:absolute;left:22px;bottom:72px;background:var(--card-bg);border:1px solid #eee;border-radius:8px;padding:6px;box-shadow:0 8px 20px rgba(0,0,0,0.06);z-index:30;min-width:140px}
-.sidebar-menu-item{display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;cursor:pointer;font-family:inherit}
-.sidebar-menu-item:hover{background:#fafafa}
+.sidebar-menu-pop {
+  position: absolute;
+  left: 22px;
+  bottom: 72px;
+  background: var(--card-bg);
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  z-index: 30;
+  min-width: 140px;
+}
+
+.sidebar-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.sidebar-menu-item:hover {
+  background: #fafafa;
+}
 
 .sidebar-avatar {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #0b76c7; /* blue avatar */
+  background: #0b76c7;
   color: #fff;
   display: flex;
   align-items: center;
@@ -87,27 +109,26 @@
 
 .nav-item {
   display: flex;
-  align-items: center; /* vertical centering */
+  align-items: center;
   gap: 12px;
   color: var(--muted);
   text-decoration: none;
-  padding: 0 8px; /* remove vertical padding in favor of fixed height */
-  height: 44px; /* consistent item height so icons/labels line up */
+  padding: 0 8px;
+  height: 44px;
   border-radius: 10px;
   transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
   text-transform: uppercase;
   font-weight: 900;
   font-size: 13px;
 
-  /* Prevent layout shift when active border appears */
-  box-sizing: border-box;          /* include border in height/width calculations */
-  border: 1px solid transparent;   /* reserve space for active border without shifting */
+  /* Prevents layout shift when active border appears */
+  box-sizing: border-box;
+  border: 1px solid transparent;
 }
 
 .nav-icon {
   font-size: 18px;
-  color: #FFC800; /* yellow-ish like the screenshot icons */
-  /* place icon inside a fixed square so it is always centered */
+  color: #FFC800;
   width: 28px;
   height: 28px;
   display: inline-flex;
@@ -118,7 +139,7 @@
 
 .nav-label {
   color: inherit;
-  line-height: 1; /* ensure label is vertically centered within the item height */
+  line-height: 1;
   display: inline-block;
 }
 
@@ -153,14 +174,12 @@
 }
 
 @media (min-width: 901px) {
-  /* keep footer visible and aligned on wide screens */
   .sidebar-footer {
     padding-bottom: 6px;
   }
 }
 
 @media (max-width: 900px) {
-  /* hide the username when collapsed */
   .sidebar-username {
     display: none;
   }
@@ -178,7 +197,6 @@
   }
 }
 
-/* layout helper used by pages that render the sidebar + content */
 .with-sidebar {
   display: block;
   align-items: stretch;
@@ -193,6 +211,6 @@
   flex: 1;
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 28px 36px; /* give page content breathing room */
+  padding: 28px 36px;
   margin-left: var(--sidebar-width);
 }

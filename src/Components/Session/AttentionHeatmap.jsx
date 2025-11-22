@@ -21,21 +21,17 @@ export default function AttentionHeatmap({ detections = [], duration = 0, width 
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
 
-    // Set canvas size accounting for device pixel ratio
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     ctx.scale(dpr, dpr);
 
-    // Clear canvas
     ctx.clearRect(0, 0, width, height);
 
-    // Draw background
     ctx.fillStyle = '#f3f4f6';
     ctx.fillRect(0, 0, width, height);
 
-    // If no detections, show placeholder text
     if (detections.length === 0) {
       ctx.fillStyle = '#9ca3af';
       ctx.font = '14px sans-serif';
@@ -44,7 +40,6 @@ export default function AttentionHeatmap({ detections = [], duration = 0, width 
       return;
     }
 
-    // Draw attention heatmap
     drawAttentionHeatmap(ctx, detections, duration, width, height);
 
   }, [detections, duration, width, height]);
@@ -54,7 +49,6 @@ export default function AttentionHeatmap({ detections = [], duration = 0, width 
 
     const heatmapHeight = h - 30;
 
-    // Draw each detection's attention weights
     dets.forEach(detection => {
       if (!detection.attention || detection.attention.length === 0) return;
 
@@ -62,18 +56,15 @@ export default function AttentionHeatmap({ detections = [], duration = 0, width 
       const endX = (detection.end / dur) * w;
       const segmentWidth = (endX - startX) / detection.attention.length;
 
-      // Normalize attention weights
       const maxAttn = Math.max(...detection.attention);
       const minAttn = Math.min(...detection.attention);
       const range = maxAttn - minAttn || 1;
 
-      // Draw each attention weight as a vertical bar
       detection.attention.forEach((attn, i) => {
         const x = startX + (i * segmentWidth);
         const normalizedAttn = (attn - minAttn) / range;
 
-        // Color gradient from blue (low) to red (high attention)
-        const hue = (1 - normalizedAttn) * 240; // 240 = blue, 0 = red
+        const hue = (1 - normalizedAttn) * 240;
         ctx.fillStyle = `hsl(${hue}, 70%, 50%)`;
 
         const barHeight = normalizedAttn * heatmapHeight;

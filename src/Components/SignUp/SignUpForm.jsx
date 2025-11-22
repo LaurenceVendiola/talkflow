@@ -17,12 +17,10 @@ export default function SignUpForm() {
 	const [generalError, setGeneralError] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	// true when both password fields are non-empty and equal
 	const passwordsMatch = password && confirmPassword && password === confirmPassword;
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		// client-side mismatch check
 		if (password !== confirmPassword) {
 			setConfirmError('Passwords do not match');
 			return;
@@ -32,7 +30,6 @@ export default function SignUpForm() {
 			const cred = await auth.createUserWithEmailAndPassword(email, password);
 			const uid = cred.user && cred.user.uid;
 			await createUserProfile(uid, { firstName, lastName, email });
-			// sign the user out so they can log in via the Log In page
 			try {
 				await auth.signOut();
 			} catch (e) {
@@ -42,7 +39,6 @@ export default function SignUpForm() {
 			navigate('/LogIn');
 		} catch (err) {
 			console.error('Signup failed', err);
-			// If email already exists, show inline tooltip on the email field.
 			if (err && err.code === 'auth/email-already-in-use') {
 				setEmailError('An account with this email already exists.');
 			} else {
@@ -52,7 +48,6 @@ export default function SignUpForm() {
 		}
 	};
 
-	// Check email availability when user leaves the email input
 	const checkEmailAvailability = async () => {
 		setEmailError('');
 		if (!email) return;
@@ -64,18 +59,13 @@ export default function SignUpForm() {
 				setEmailError('');
 			}
 		} catch (e) {
-			// Network or service error while checking availability — log only.
-			// Do not set a user-facing tooltip here so typing doesn't trigger an error
-			// message; we'll surface server-side errors on submit instead.
 			console.warn('Email availability check failed', e);
 		}
 	};
 
-	// Debounced live check: run availability check ~500ms after user stops typing
 	useEffect(() => {
-		// clear any previous general error while typing
 		setGeneralError('');
-		// if empty, clear error and do nothing
+		if (!email) {
 		if (!email) {
 			setEmailError('');
 			return;
@@ -90,7 +80,6 @@ export default function SignUpForm() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [email]);
 
-	// Validate confirm password as the user types
 	const handleConfirmChange = (val) => {
 		setConfirmPassword(val);
 		if (password && val && password !== val) {

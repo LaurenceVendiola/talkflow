@@ -1,9 +1,9 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { FiUploadCloud } from 'react-icons/fi';
-import './WavUploader.css';
+import './AudioUploader.css';
 
 /**
- * WavUploader
+ * AudioUploader
  * - Renders a visible upload area/button which opens the file picker when clicked
  * - Supports drag & drop of files
  * - Accepts only .wav files (by mime type and/or extension)
@@ -17,7 +17,7 @@ import './WavUploader.css';
  * - className?: string     (passes through for styling)
  * - onActivate?: () => void (optional callback when user focuses/activates uploader)
  */
-export default function WavUploader({ onFileSelected, maxSizeBytes = 10 * 1024 * 1024, className = '', onActivate }) {
+export default function AudioUploader({ onFileSelected, maxSizeBytes = 10 * 1024 * 1024, className = '', onActivate }) {
   const inputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState('');
@@ -35,7 +35,6 @@ export default function WavUploader({ onFileSelected, maxSizeBytes = 10 * 1024 *
     inputRef.current && inputRef.current.click();
   };
 
-  // Accept WAV, MP3, and WebM formats by extension or common MIME types
   const isAcceptedAudio = f => {
     if (!f) return false;
     const name = (f.name || '').toLowerCase();

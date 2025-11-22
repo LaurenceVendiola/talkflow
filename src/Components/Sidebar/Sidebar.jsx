@@ -16,13 +16,10 @@ const Sidebar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [viewProfileOpen, setViewProfileOpen] = useState(false);
 
-  // Check if current route is a sessions-related route
   const isSessionsActive = ['/SessionOptions', '/Recording', '/Session'].includes(location.pathname);
-  
-  // Check if current route is a dashboard-related route
   const isDashboardActive = ['/Home', '/PatientProfile'].includes(location.pathname);
 
-  // Display name: firstName + space + first letter of lastName + '.'
+  
   const displayName = user
     ? `${user.firstName || ''}${user.lastName ? ' ' + (user.lastName.charAt(0).toUpperCase() + '.') : ''}`.trim()
     : '';

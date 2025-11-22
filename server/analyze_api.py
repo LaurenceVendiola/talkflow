@@ -13,24 +13,19 @@ from typing import Dict, Any
 from pydub import AudioSegment
 import torch.hub
 
-# --- Configuration ---
 TARGET_SR = 16000
-CHUNK_SIZE_SEC = 3.0  # Analyze in 3-second chunks
-STEP_SIZE_SEC = 1.0   # With a 1-second step (2-second overlap)
+CHUNK_SIZE_SEC = 3.0
+STEP_SIZE_SEC = 1.0
 TASKS = ["block", "wordrep", "soundrep", "prolongation", "interjection"]
 MODEL_DIR = str(Path(__file__).parent.parent / "src" / "Components" / "wavlm_models")
-
-# Model Hyperparameters (MUST match what you trained with)
 LSTM_HIDDEN_DIM = 128
 LSTM_LAYERS = 2
 DROPOUT = 0.3
 
-# --- 1. Model Definitions ---
-
 class WavLMLayeredExtractor(nn.Module):
     """
-    A feature extractor that wraps a pre-trained WavLM model and
-    computes a *learned* weighted average of its intermediate transformer layers.
+    Feature extractor that wraps a pre-trained WavLM model and
+    computes a learned weighted average of its intermediate transformer layers.
     """
     def __init__(self, model_name="microsoft/wavlm-base-plus"):
         super().__init__()
@@ -52,14 +47,14 @@ class WavLMLayeredExtractor(nn.Module):
 
     def forward(self, audio_input, attention_mask):
         """
-        Processes raw audio input and returns a weighted-average feature tensor.
+        Processes raw audio input and returns weighted-average feature tensor.
         
         Args:
-            audio_input (Tensor): Raw waveform tensor of shape (Batch, NumSamples).
+            audio_input (Tensor): Raw waveform tensor of shape (Batch, NumSamples)
             attention_mask (Tensor): Boolean mask of shape (Batch, NumSamples)
         
         Returns:
-            Tensor: Weighted feature tensor of shape (Batch, SeqLen, 768).
+            Tensor: Weighted feature tensor of shape (Batch, SeqLen, 768)
         """
         outputs = self.wavlm(
             input_values=audio_input,
@@ -83,7 +78,7 @@ class WavLMLayeredExtractor(nn.Module):
         return weighted_average, output_attention_mask
 
 class Attention(nn.Module):
-    """Attention mechanism for the temporal model."""
+    """Attention mechanism for temporal disfluency detection."""
     def __init__(self, hidden_dim):
         super(Attention, self).__init__()
         self.W = nn.Linear(hidden_dim, hidden_dim, bias=False)
@@ -125,20 +120,16 @@ class TemporalDisfluencyNet(nn.Module):
         logits = self.classifier(context_vector)
         return logits, attention_weights
 
-# --- 2. FastAPI App Initialization ---
-
 app = FastAPI(title="Disfluency Analyzer API")
 
-# Global variables to hold models
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 feature_extractor = None
 model_bank = {}
 vad_model = None
 
-# Add CORS middleware to allow React app to call this API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for now
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -146,7 +137,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 def load_models():
-    """Load all models into memory when the server starts."""
+    """Loads all models into memory when the server starts."""
     global feature_extractor, model_bank, device, vad_model
     print(f"Loading models onto device: {device}...")
     print(f"Current working directory: {Path.cwd()}")
@@ -163,7 +154,7 @@ def load_models():
     
     # Load Silero VAD model for speech region detection
     try:
-        vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=False)
+        vad_model, _ = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', force_reload=False)
         vad_model.to(device)
         print("Successfully loaded Silero VAD model")
     except Exception as e:
@@ -254,47 +245,38 @@ def detect_speech_regions(waveform: np.ndarray, sr: int = 16000, threshold: floa
 @app.post("/analyze")
 async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
     """
-    Analyzes an audio file (.wav, .mp3, or .webm) for all 5 disfluency types.
-    Returns detected disfluencies and summary counts.
+    Analyzes an audio file for all 5 disfluency types.
+    Supports: .wav, .mp3, .webm, .ogg, .flac formats.
+    Returns detected disfluencies with timestamps, confidence scores, and summary counts.
     """
     if not feature_extractor or not model_bank:
         raise HTTPException(status_code=503, detail="Models are not loaded. Server may be starting.")
     
-    # Validate file type
     filename = file.filename.lower()
-    if not (filename.endswith('.wav') or filename.endswith('.mp3') or filename.endswith('.webm')):
-        raise HTTPException(status_code=400, detail="Only .wav, .mp3, and .webm files are supported")
+    supported_formats = ('.wav', '.mp3', '.webm', '.ogg', '.flac')
+    if not filename.endswith(supported_formats):
+        raise HTTPException(status_code=400, detail="Supported formats: .wav, .mp3, .webm, .ogg, .flac")
     
-    # 1. Read and load audio file using pydub
     try:
         contents = await file.read()
         
-        # Use pydub to load audio file (supports WebM, MP3, WAV, OGG, FLAC)
         audio = AudioSegment.from_file(io.BytesIO(contents))
         
-        # Convert to mono if stereo
         if audio.channels > 1:
             audio = audio.set_channels(1)
         
-        # Resample to TARGET_SR if needed
         if audio.frame_rate != TARGET_SR:
             audio = audio.set_frame_rate(TARGET_SR)
         
-        # Convert to numpy array
         samples = np.array(audio.get_array_of_samples(), dtype=np.float32)
-        
-        # Normalize to [-1, 1] range
         waveform = samples / 32768.0
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Could not read audio file: {str(e)}")
 
-    # 2. Detect speech regions using VAD
     print("Running VAD to detect speech regions...")
     speech_regions = detect_speech_regions(waveform, TARGET_SR)
     print(f"Detected {len(speech_regions)} speech regions")
-    
-    # 3. Create sliding window chunks only within speech regions
     chunk_samples = int(CHUNK_SIZE_SEC * TARGET_SR)
     step_samples = int(STEP_SIZE_SEC * TARGET_SR)
     
@@ -302,7 +284,6 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
     chunk_start_times = []
     
     for speech_start, speech_end in speech_regions:
-        # Convert speech region times to sample indices
         start_sample = int(speech_start * TARGET_SR)
         end_sample = int(speech_end * TARGET_SR)
         
@@ -386,7 +367,7 @@ async def analyze_audio(file: UploadFile = File(...)) -> Dict[str, Any]:
                     if summary_key:
                         summary_counts[summary_key] += 1
 
-    # 5. Return results with summary and duration
+    # 6. Return results with summary and duration
     duration = len(waveform) / TARGET_SR
     
     # Memory cleanup - critical to prevent server crash
@@ -427,7 +408,7 @@ def read_root():
 
 if __name__ == "__main__":
     import os
-    # Use PORT environment variable from Railway, fallback to 8001 for local
+    # Use PORT environment variable from AWS EC2, fallback to 8001 for local development
     port = int(os.environ.get("PORT", 8001))
-    # Railway requires binding to 0.0.0.0
+    # Bind to 0.0.0.0 to accept connections from all network interfaces
     uvicorn.run(app, host="0.0.0.0", port=port)

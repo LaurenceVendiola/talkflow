@@ -11,7 +11,6 @@ export default function LogInForm() {
 	const [error, setError] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	// Single non-revealing message for any auth failure
 	const credentialErrorMessage = 'Invalid username or password.';
 
 	const handleSubmit = async (e) => {
@@ -19,8 +18,6 @@ export default function LogInForm() {
 		setError('');
 		setIsSubmitting(true);
 		try {
-			// Use the returned user credential when possible to avoid a race
-			// between navigation and the AuthProvider onAuthStateChanged handler.
 			const cred = await auth.signInWithEmailAndPassword(email, password);
 			const signedUser = cred && cred.user ? cred.user : auth.currentUser;
 			if (signedUser) {
@@ -28,7 +25,6 @@ export default function LogInForm() {
 				return;
 			}
 
-			// Fallback: wait for the auth state to update once and then navigate.
 			const unsub = auth.onAuthStateChanged((u) => {
 				if (u) {
 					unsub();

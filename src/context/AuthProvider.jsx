@@ -12,14 +12,10 @@ export function AuthProvider({ children }) {
   React.useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (u) => {
       if (u) {
-        // Inform the store about the current user as early as possible so listeners
-        // subscribe with the correct ownerId and don't show other users' data.
         setCurrentUser(u.uid);
-        // try to load profile
         const profile = await getUserProfile(u.uid);
         setUser({ uid: u.uid, email: u.email, ...(profile || {}) });
       } else {
-        // clear store listeners first
         setCurrentUser(null);
         setUser(null);
       }

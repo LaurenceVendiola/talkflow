@@ -1,15 +1,14 @@
-/* Session Options styles */
-:root{
-  --tf-green:#53d113;
-  --muted:#666;
-  --card-bg:#fff;
-  --btn-orange:#ff8a00;
+:root {
+  --tf-green: #53d113;
+  --muted: #666;
+  --card-bg: #fff;
+  --btn-orange: #ff8a00;
 }
 
-.session-options-root{
-  padding:40px 56px;
+.session-options-root {
+  padding: 40px 56px;
   font-family: 'Nunito', sans-serif;
-  color:#222;
+  color: #222;
 }
 
 .session-options-container{
@@ -18,16 +17,49 @@
   width: 100%;
 }
 
-.so-header h1{font-size:32px;margin:0;font-weight:800;text-align:center}
-.so-sub{color:#8a8a8a;text-align:center;margin-top:6px;margin-bottom:22px}
+.so-header h1 {
+  font-size: 32px;
+  margin: 0;
+  font-weight: 800;
+  text-align: center;
+}
 
-.so-section{margin-top:22px}
-.so-section h3{font-size:18px;margin-bottom:12px}
+.so-sub {
+  color: #8a8a8a;
+  text-align: center;
+  margin-top: 6px;
+  margin-bottom: 22px;
+}
 
-.patient-list{display:flex;gap:14px;align-items:center;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+.so-section {
+  margin-top: 22px;
+}
 
-.patient-select-header{display:flex;justify-content:flex-end;margin-top:8px}
-.patient-select-actions{display:flex;gap:8px}
+.so-section h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.patient-list {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+.patient-select-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.patient-select-actions {
+  display: flex;
+  gap: 8px;
+}
 .patient-search{
   padding: 12px 16px;
   border: 1px solid #d1d5db;
@@ -53,24 +85,107 @@
   background-color: #fff;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
-.patient-card{background:var(--card-bg);border-radius:12px;padding:18px;width:150px;display:flex;flex-direction:column;align-items:center;border:2px solid #eee;cursor:pointer;flex:0 0 auto;min-width:150px}
-.patient-card.selected{background:rgba(83,209,19,0.06);border:2px solid var(--tf-green)}
-.patient-card.selected .patient-avatar{background:var(--tf-green);color:#fff}
-.patient-card.add-new{border:2px dashed #e6e6e6;color:var(--tf-green)}
-.patient-avatar{width:64px;height:64px;border-radius:50%;background:#fafafa;display:flex;align-items:center;justify-content:center;font-size:28px;color:#bbb;margin-bottom:10px;transition:all 0.2s ease}
-.patient-avatar.plus{background:transparent;color:var(--tf-green);font-size:28px}
-.patient-name{font-weight:700;color:#333}
+.patient-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 18px;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid #eee;
+  cursor: pointer;
+  flex: 0 0 auto;
+  min-width: 150px;
+}
+
+.patient-card.selected {
+  background: rgba(83, 209, 19, 0.06);
+  border: 2px solid var(--tf-green);
+}
+
+.patient-card.selected .patient-avatar {
+  background: var(--tf-green);
+  color: #fff;
+}
+
+.patient-card.add-new {
+  border: 2px dashed #e6e6e6;
+  color: var(--tf-green);
+}
+
+.patient-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #bbb;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.patient-avatar.plus {
+  background: transparent;
+  color: var(--tf-green);
+  font-size: 28px;
+}
+
+.patient-name {
+  font-weight: 700;
+  color: #333;
+}
 
 /* session type UI removed */
 
-.start-grid{margin-top:18px}
-.start-row{display:flex;gap:18px;align-items:stretch}
-.upload-card{flex:1;border: 2px solid #eee !important;border-radius:14px;padding:28px;text-align:center;background:#fff;cursor:pointer}
-.upload-card.selected{background:rgba(83,209,19,0.06);border:2px solid var(--tf-green)}
-.upload-card.selected .upload-icon{color:var(--tf-green)}
-.upload-icon{font-size:32px;color:#999;margin-bottom:8px;transition:all 0.2s ease}
-.upload-title{font-weight:800 !important;margin-bottom:6px}
-.upload-sub{color:#888;font-size:13px}
+.start-grid {
+  margin-top: 18px;
+}
+
+.start-row {
+  display: flex;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.upload-card {
+  flex: 1;
+  border: 2px solid #eee !important;
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  background: #fff;
+  cursor: pointer;
+}
+
+.upload-card.selected {
+  background: rgba(83, 209, 19, 0.06);
+  border: 2px solid var(--tf-green);
+}
+
+.upload-card.selected .upload-icon {
+  color: var(--tf-green);
+}
+
+.upload-icon {
+  font-size: 32px;
+  color: #999;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.upload-title {
+  font-weight: 800 !important;
+  margin-bottom: 6px;
+}
+
+.upload-sub {
+  color: #888;
+  font-size: 13px;
+}
 
 .record-card{
   flex:1;
@@ -90,18 +205,70 @@
   color: #222;
   border: 2px solid var(--tf-green);
 }
-.record-card.selected .record-icon{color:var(--tf-green)}
-.record-icon{font-size:32px;color:#999;transition:all 0.2s ease}
-.record-title{font-weight:800 !important; font-size: 14px; font-family: 'Nunito'!important;}
-.record-sub{font-size:13px; color:#888; font-family: 'Nunito' !important;}
+.record-card.selected .record-icon {
+  color: var(--tf-green);
+}
 
-.start-cta-wrap{margin-top:22px;text-align:center}
-.start-cta{background:var(--btn-orange);color:white;padding:10px 14px;border-radius:8px !important;font-weight:700;font-size:14px;border:1px solid #FF9600;box-shadow:0 2px 0 #EB8A00;cursor:pointer}
-.start-cta:disabled{opacity:0.6;cursor:not-allowed}
-.analysis-error{color:#c0392b;background:#fee;padding:10px 16px;border-radius:8px;margin-bottom:12px;font-size:14px;border:1px solid #f5c6c6}
+.record-icon {
+  font-size: 32px;
+  color: #999;
+  transition: all 0.2s ease;
+}
 
-@media (max-width:900px){
-  .session-options-root{padding:20px}
-  .patient-list{overflow:auto}
-  .start-row{flex-direction:column}
+.record-title {
+  font-weight: 800 !important;
+  font-size: 14px;
+  font-family: 'Nunito' !important;
+}
+
+.record-sub {
+  font-size: 13px;
+  color: #888;
+  font-family: 'Nunito' !important;
+}
+
+.start-cta-wrap {
+  margin-top: 22px;
+  text-align: center;
+}
+
+.start-cta {
+  background: var(--btn-orange);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px !important;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid #FF9600;
+  box-shadow: 0 2px 0 #EB8A00;
+  cursor: pointer;
+}
+
+.start-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.analysis-error {
+  color: #c0392b;
+  background: #fee;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  border: 1px solid #f5c6c6;
+}
+
+@media (max-width: 900px) {
+  .session-options-root {
+    padding: 20px;
+  }
+
+  .patient-list {
+    overflow: auto;
+  }
+
+  .start-row {
+    flex-direction: column;
+  }
 }

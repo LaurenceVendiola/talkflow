@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { IoMdPerson } from 'react-icons/io';
 import { FaMicrophone } from 'react-icons/fa';
 import './SessionOptions.css';
-import WavUploader from './WavUploader';
+import AudioUploader from './AudioUploader';
 import Sidebar from '../Sidebar/Sidebar';
 import { getPatients, addSession } from '../../utils/store';
 import { analyzeAudioFile, formatAnalysisResults, checkServerHealth } from '../../services/disfluencyAnalyzer';
@@ -49,7 +49,7 @@ export default function SessionOptionsForm() {
         <div className="session-options-container">
           <header className="so-header">
             <h1>Start New Session</h1>
-            <p className="so-sub">Select a patient and begin recording</p>
+            <p className="so-sub">Select a patient and choose to upload audio or record live</p>
           </header>
 
           <section className="so-section">
@@ -110,14 +110,13 @@ export default function SessionOptionsForm() {
       <section className="so-section start-grid">
         <h3>Choose Your Approach</h3>
         <div className="start-row">
-          <WavUploader
+          <AudioUploader
             className={`upload-card ${startMethod === 'upload' ? 'selected' : ''}`}
             onActivate={() => setStartMethod('upload')}
             onFileSelected={(f) => {
               setStartMethod('upload');
               setUploadedFile(f);
               setAnalysisError('');
-              console.log('WavUploader selected file:', f);
             }}
             maxSizeBytes={10 * 1024 * 1024}
           />
