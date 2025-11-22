@@ -66,13 +66,11 @@ export default function SignUpForm() {
 	useEffect(() => {
 		setGeneralError('');
 		if (!email) {
-		if (!email) {
 			setEmailError('');
 			return;
 		}
 
 		const id = setTimeout(() => {
-			// call the same check used onBlur
 			checkEmailAvailability();
 		}, 500);
 
